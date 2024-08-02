@@ -5,7 +5,7 @@ import {
   Variant,
 } from "framer-motion";
 import { useEffect, useMemo, useRef } from "react";
-import { usePresentation } from "./presentation";
+import { getStepId, StepCache, usePresentation } from "./presentation";
 
 const defaultVariants = {
   initial: { height: 0, opacity: 0 },
@@ -23,8 +23,6 @@ type Variants = {
   initial: Variant;
   show: Variant;
 };
-
-const StepCache = new Map<string, string>();
 
 export default function Step({
   children,
@@ -45,7 +43,7 @@ export default function Step({
 
   const { addStep, currentSlide } = usePresentation();
 
-  const id = `step-${currentSlide}-${index}`;
+  const id = getStepId(currentSlide, index);
 
   const step = useMemo(() => {
     return StepCache.get(id);

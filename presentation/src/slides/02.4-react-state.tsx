@@ -1,7 +1,22 @@
 import BrowserUI from "@/components/browser-ui";
-import { FlowChart } from "@/components/flow-chart";
+import { FlowChart, FlowChartConnection } from "@/components/flow-chart";
 import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
+
+const connections: FlowChartConnection[] = [
+  {
+    start: "1",
+    end: "2",
+    startPosition: "right",
+    endPosition: "left",
+  },
+  {
+    start: "2",
+    end: "3",
+    startPosition: "right",
+    endPosition: "left",
+  },
+];
 
 export default function ReactState() {
   const [dark, setDark] = useState(false);
@@ -21,29 +36,19 @@ export default function ReactState() {
         over the lifetime of a component.
       </p>
       <FlowChart
-        connections={[
-          {
-            start: "1",
-            end: "2",
-            startPosition: "right",
-            endPosition: "left",
-          },
-          {
-            start: "2",
-            end: "3",
-            startPosition: "right",
-            endPosition: "left",
-          },
-        ]}
+        connections={connections}
         className="flex text-2xl justify-between w-full items-start gap-40 max-h-[500px]"
       >
         <div
           id="1"
-          className="border border-border p-6 rounded-lg min-w-[300px]"
+          className="border bg-background border-border p-6 rounded-lg min-w-[300px]"
         >
           <pre>theme = {dark ? '"dark"' : '"light"'}</pre>
         </div>
-        <div id="2" className="border border-border p-6 rounded-lg">
+        <div
+          id="2"
+          className="border bg-background  border-border p-6 rounded-lg"
+        >
           Rerenders
         </div>
         <BrowserUI

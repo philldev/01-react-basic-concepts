@@ -66,16 +66,16 @@ export default function RenderTreeExample() {
   return (
     <div className="flex justify-center flex-col h-full">
       <div className="flex items-center">
-        <Step index={0} className="flex-1">
+        <div className="flex-1">
           <Code
             code={steps[0].code}
             styled={false}
             lineNumbers={false}
             className="text-xl"
           />
-        </Step>
+        </div>
 
-        <Step index={1} className="flex-1">
+        <Step index={0} className="flex-1">
           <FlowChart
             connections={connections}
             className="font-mono flex flex-col gap-14 w-full"
