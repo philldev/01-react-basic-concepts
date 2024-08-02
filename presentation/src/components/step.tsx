@@ -1,10 +1,22 @@
-import { motion as m, useAnimationControls, Variant } from "framer-motion";
+import {
+  AnimationControls,
+  motion as m,
+  useAnimationControls,
+  Variant,
+} from "framer-motion";
+import { useEffect, useMemo, useRef } from "react";
 import { usePresentation } from "./presentation";
-import { useEffect, useId, useMemo, useRef } from "react";
 
 const defaultVariants = {
-  initial: { opacity: 0 },
-  show: { opacity: 1 },
+  initial: { height: 0, opacity: 0 },
+  show: {
+    height: "auto",
+    opacity: 1,
+    transition: {
+      duration: 0.5,
+      ease: "easeInOut",
+    },
+  },
 };
 
 type Variants = {
@@ -19,12 +31,14 @@ export default function Step({
   className,
   index,
   variants,
+  onNext,
   ...props
 }: Readonly<
   {
     children: React.ReactNode;
     index: number;
     variants?: Variants;
+    onNext?: (controls: AnimationControls) => Promise<void>;
   } & React.ComponentProps<typeof m.div>
 >) {
   const controls = useAnimationControls();
@@ -46,12 +60,22 @@ export default function Step({
 
     if (step === "animated") return;
 
+    const handleNext = async () => {
+      await onNext?.(controls);
+    };
+
     const show = async () => {
       await controls.start("show");
       StepCache.set(id, "animated");
+
+      if (onNext) {
+        return handleNext;
+      }
+
+      return undefined;
     };
 
-    addStep(show);
+    addStep(show, index);
 
     return () => {
       controls.stop();

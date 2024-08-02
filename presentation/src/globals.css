@@ -4,6 +4,7 @@
 
 :root {
   --font-mono: "JetBrains Mono", monospace;
+  --font-sans: "Geist", sans-serif;
 }
 
 @layer base {
@@ -71,4 +72,3 @@
     @apply bg-background text-foreground;
   }
 }
-

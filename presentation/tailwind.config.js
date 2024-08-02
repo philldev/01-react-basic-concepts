@@ -21,6 +21,7 @@ module.exports = {
     extend: {
       fontFamily: {
         mono: ["var(--font-mono)", ...defaultTheme.fontFamily.mono],
+        sans: ["var(--font-sans)", ...defaultTheme.fontFamily.sans],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -75,9 +76,9 @@ module.exports = {
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "animate-spin-slow": "animate-spin 0.8s linear infinite",
       },
     },
   },
   plugins: [require("tailwindcss-animate")],
 };
-

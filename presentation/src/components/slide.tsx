@@ -26,7 +26,7 @@ export default function Slide({
   return (
     <m.div
       className={cn(
-        "h-screen absolute inset-0 w-screen p-10 overflow-hidden",
+        "h-screen absolute inset-0 w-screen p-20 overflow-hidden",
         className,
       )}
       custom={direction}
@@ -34,7 +34,7 @@ export default function Slide({
       exit="exit"
       initial="initial"
       animate="show"
-      transition={{ duration: 0.5 }}
+      transition={{ duration: 1, ease: "easeInOut" }}
       {...props}
     >
       {children}
