@@ -6,8 +6,8 @@ import Step from "@/components/step";
 import { motion, useAnimationControls } from "framer-motion";
 import { useAddStep } from "@/components/presentation";
 import { useState } from "react";
-import { Button } from "@/components/button";
 import BrowserUI from "@/components/browser-ui";
+import { Button } from "@/components/ui/button";
 
 const { steps } = parseRoot(
   Content,
