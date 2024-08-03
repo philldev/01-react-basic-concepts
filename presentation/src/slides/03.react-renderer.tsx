@@ -1,22 +1,22 @@
 const rendererList = [
   {
-    platform: "Web",
+    platform: "Web 🪩",
     renderers: ["react-dom", "react-tiny-dom"],
   },
   {
-    platform: "Mobile",
+    platform: "Mobile 📱",
     renderers: ["react-native", "react-titanium"],
   },
   {
-    platform: "Desktop",
+    platform: "Desktop 🖥️",
     renderers: ["proton-native", "react-gtk"],
   },
   {
-    platform: "3D",
+    platform: "3D 🎨",
     renderers: ["react-three-fiber", "react-babylonjs", "react-unity"],
   },
   {
-    platform: "TV",
+    platform: "TV 📺",
     renderers: ["react-tv", "react-tvml", "react-ape"],
   },
 ];

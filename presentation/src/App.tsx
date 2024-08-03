@@ -12,6 +12,9 @@ import ReactEffects from "./slides/02.6-react-effects";
 import RenderTree from "./slides/02.7-render-tree";
 import RenderTreeExample from "./slides/02.7.2-render-tree";
 import ReactRenderer from "./slides/03.react-renderer";
+import ReactRenderingProcess from "./slides/04-react-rendering-process";
+import Trigger from "./slides/04.1-trigger";
+import Render from "./slides/04.2-render";
 
 function App() {
   return (
@@ -54,6 +57,18 @@ function App() {
 
       <Slide>
         <ReactRenderer />
+      </Slide>
+
+      <Slide>
+        <ReactRenderingProcess />
+      </Slide>
+
+      <Slide>
+        <Trigger />
+      </Slide>
+
+      <Slide>
+        <Render />
       </Slide>
     </Presentation>
   );

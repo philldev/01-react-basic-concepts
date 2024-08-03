@@ -84,11 +84,13 @@ function getConnectionPath(
     if (middle[0] > start[0]) path.lineTo(middle[0] - 25, start[1]);
     else path.lineTo(middle[0] + 25, start[1]);
 
+    const YDelta = Math.min(25, Math.abs(start[1] - end[1]) / 2);
+
     if (start[1] > end[1]) {
-      path.quadraticCurveTo(middle[0], start[1], middle[0], start[1] - 25);
+      path.quadraticCurveTo(middle[0], start[1], middle[0], start[1] - YDelta);
       path.lineTo(middle[0], end[1] + 25);
     } else if (start[1] < end[1]) {
-      path.quadraticCurveTo(middle[0], start[1], middle[0], start[1] + 25);
+      path.quadraticCurveTo(middle[0], start[1], middle[0], start[1] + YDelta);
       path.lineTo(middle[0], end[1] - 25);
     }
 

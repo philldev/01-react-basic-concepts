@@ -64,6 +64,7 @@ export function Code(
       className={cn(
         "w-max",
         styled && "rounded-md border-border p-4 border",
+        lineNumbers && "pl-2",
         className,
       )}
       {...restContainerProps}

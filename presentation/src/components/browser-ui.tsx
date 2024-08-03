@@ -16,7 +16,7 @@ export default function BrowserUI({
         <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
         <div className="w-3 h-3 rounded-full bg-green-500"></div>
       </div>
-      <div className="min-w-[300px] pt-4">{children}</div>
+      <div className="min-w-[300px] h-full pt-4">{children}</div>
     </div>
   );
 }

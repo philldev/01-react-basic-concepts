@@ -99,11 +99,13 @@ export default function Presentation({
   };
 
   const slideToNext = async () => {
-    if (slideIndex === slideLength - 1) return;
     if (steps.length > 0) {
       await handleSteps();
       return;
     }
+
+    if (slideIndex === slideLength - 1) return;
+
     setPrevStepCb(undefined);
     setSteps([]);
     setDirection(1);
