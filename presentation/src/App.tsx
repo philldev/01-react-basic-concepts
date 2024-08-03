@@ -1,76 +1,58 @@
-import Presentation from "./components/presentation";
-import Slide from "./components/slide";
-import Cover from "./slides/00-cover";
-import Outline from "./slides/00.1-outline";
-import WhatIsReact from "./slides/01-intro";
-import BasicConcepts from "./slides/02-basic-concepts";
-import ReactElement from "./slides/02.1-react-element";
-import ReactComponent from "./slides/02.3-react-component";
-import ReactState from "./slides/02.4-react-state";
-import StateInReact from "./slides/02.5.2-react-state";
-import ReactEffects from "./slides/02.6-react-effects";
-import RenderTree from "./slides/02.7-render-tree";
-import RenderTreeExample from "./slides/02.7.2-render-tree";
-import ReactRenderer from "./slides/03.react-renderer";
-import ReactRenderingProcess from "./slides/04-react-rendering-process";
-import Trigger from "./slides/04.1-trigger";
-import Render from "./slides/04.2-render";
+import { useEffect, useRef } from "react";
+import { Deck, Slide, Step, useDeck } from "./components/deck";
 
 function App() {
   return (
-    <Presentation>
-      <Slide>
-        <Cover />
-      </Slide>
-      <Slide>
-        <Outline />
-      </Slide>
-      <Slide>
-        <WhatIsReact />
-      </Slide>
-      <Slide>
-        <BasicConcepts />
-      </Slide>
-      <Slide>
-        <ReactElement />
-      </Slide>
-      <Slide>
-        <ReactComponent />
-      </Slide>
-      <Slide>
-        <ReactState />
-      </Slide>
-      <Slide>
-        <StateInReact />
-      </Slide>
-      <Slide>
-        <ReactEffects />
-      </Slide>
+    <Deck>
+      <Slide element={<div>Slide 1</div>} />
+      <Slide element={<Slide2 />} />
+      <Slide element={<div>Slide 3</div>} />
+      <Slide element={<div>Slide 4</div>} />
+    </Deck>
+  );
+}
 
-      <Slide>
-        <RenderTree />
-      </Slide>
+function useOnMount(callback: () => void) {
+  const mounted = useRef(false);
 
-      <Slide>
-        <RenderTreeExample />
-      </Slide>
+  useEffect(() => {
+    if (mounted.current) return;
+    mounted.current = true;
+    callback();
+  }, []);
+}
 
-      <Slide>
-        <ReactRenderer />
-      </Slide>
+function Slide2() {
+  const { deckSteps, slideIndex } = useDeck();
 
-      <Slide>
-        <ReactRenderingProcess />
-      </Slide>
+  useOnMount(() => {
+    deckSteps.addStep(slideIndex, {
+      id: "step-1",
+      show: () => {
+        console.log("step 1");
+      },
+      order: 0,
+    });
 
-      <Slide>
-        <Trigger />
-      </Slide>
+    deckSteps.addStep(slideIndex, {
+      id: "step-2",
+      show: () => {
+        console.log("step 2");
+      },
+      order: 1,
+    });
+  });
 
-      <Slide>
-        <Render />
-      </Slide>
-    </Presentation>
+  return (
+    <div>
+      <h1>Slide 2</h1>
+      <Step order={5}>
+        <h1>Step 3</h1>
+      </Step>
+      <Step order={6}>
+        <h1>Step 4</h1>
+      </Step>
+    </div>
   );
 }
 
