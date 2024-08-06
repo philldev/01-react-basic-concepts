@@ -1,18 +1,10 @@
-import reactLogo from "@/assets/react.svg";
-
 export default function Cover() {
   return (
     <div className="flex h-full relative flex-col justify-center">
       <div className="flex gap-10">
-        <img
-          className="animate-spin-slow mb-10"
-          src={reactLogo}
-          alt="React Logo"
-          width={100}
-          height={100}
-        />
-
-        <h1 className="text-left text-9xl font-medium mb-10">Core Concepts</h1>
+        <h1 className="text-left text-9xl font-medium mb-10">
+          React Core Concepts
+        </h1>
       </div>
       <h2 className="text-left text-4xl mb-10 text-foreground/50">
         How React works under the hood

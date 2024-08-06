@@ -23,18 +23,21 @@ import {
 import { Button } from "./ui/button";
 import {
   AnimatePresence,
+  AnimationControls,
   motion,
   useAnimationControls,
   Variant,
 } from "framer-motion";
 
 const SLIDE_DISPLAY_NAME = "Slide" as const;
+const SLIDES_DISPLAY_NAME = "Slides" as const;
 const NEXT_KEY = "ArrowRight";
 const PREV_KEY = "ArrowLeft";
 
 interface _Step {
   id: string;
   show: () => void;
+  onNext?: () => void;
   order: number;
 }
 
@@ -50,6 +53,10 @@ class SlideSteps {
 
   getCurrentStep() {
     return this.steps[this.currentIndex];
+  }
+
+  getPreviousStep() {
+    return this.steps[this.currentIndex - 1];
   }
 
   getStep(index: number) {
@@ -81,6 +88,7 @@ class SlideSteps {
 interface StepWithPartialOrder {
   id: string;
   show: () => void;
+  onNext?: () => void;
   order?: number;
 }
 
@@ -197,6 +205,10 @@ function Deck({
       slideSteps.length > 0 &&
       slideSteps.getCurrentIndex() < slideSteps.length
     ) {
+      const prevStep = slideSteps.getPreviousStep();
+      if (prevStep) {
+        prevStep.onNext?.();
+      }
       slideSteps.getCurrentStep().show();
       slideSteps.setCurrentIndex(slideSteps.getCurrentIndex() + 1);
       return;
@@ -343,12 +355,12 @@ type StepVariants = {
 };
 
 interface StepProps extends ComponentProps<typeof motion.div> {
-  asChild?: boolean;
   variants?: StepVariants;
   order?: number;
+  onNext?: (controls: AnimationControls) => void;
 }
 
-function Step({ variants, ...props }: Readonly<StepProps>) {
+function Step({ variants, order, onNext, ...props }: Readonly<StepProps>) {
   const controls = useAnimationControls();
 
   const id = useId();
@@ -366,7 +378,12 @@ function Step({ variants, ...props }: Readonly<StepProps>) {
       show: () => {
         controls.start("show");
       },
-      order: props.order ?? deckSteps.getSlideSteps(slideIndex).length,
+      onNext: () => {
+        if (onNext) {
+          onNext(controls);
+        }
+      },
+      order: order ?? deckSteps.getSlideSteps(slideIndex).length,
     });
 
     return () => {
