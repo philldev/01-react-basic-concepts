@@ -1,4 +1,3 @@
-import { SlideSubheading } from "@/components/ui/slide-subheading";
 import { SlideText } from "@/components/ui/slide-text";
 
 export default function RenderingSteps() {
