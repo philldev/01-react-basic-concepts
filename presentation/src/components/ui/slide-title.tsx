@@ -11,5 +11,13 @@ export function SlideTitle({
   ...props
 }: SlideTitleProps) {
   const Comp = asChild ? Slot : "h1";
-  return <Comp className={cn("text-8xl font-medium", className)} {...props} />;
+  return (
+    <Comp
+      className={cn(
+        "text-8xl font-medium underline underline-offset-4",
+        className,
+      )}
+      {...props}
+    />
+  );
 }

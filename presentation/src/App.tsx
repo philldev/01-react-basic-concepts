@@ -14,6 +14,8 @@ import Trigger from "./slides/03-how-rendering-works/2-trigger";
 import Trigger0 from "./slides/03-how-rendering-works/2.0-trigger";
 import Trigger1 from "./slides/03-how-rendering-works/2.1-trigger";
 import Reconciliation from "./slides/03-how-rendering-works/3-reconciliation";
+import DiffingAlgo from "./slides/03-how-rendering-works/4-diffing-algo";
+import DiffingAlgo1 from "./slides/03-how-rendering-works/4.1-diffing-algo";
 
 const slides = [
   Cover,
@@ -31,6 +33,8 @@ const slides = [
   Trigger0,
   Trigger1,
   Reconciliation,
+  DiffingAlgo,
+  DiffingAlgo1,
 ] as const;
 
 function App() {

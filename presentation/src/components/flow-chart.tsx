@@ -1,7 +1,7 @@
 import { PathBuilder } from "@/lib/draw-path";
 import { cn } from "@/lib/utils";
 import { cva, VariantProps } from "class-variance-authority";
-import { useAnimate } from "framer-motion";
+import { motion, useAnimate } from "framer-motion";
 import {
   ComponentProps,
   ReactElement,
@@ -12,7 +12,7 @@ import {
   useState,
 } from "react";
 
-export type FlowChartNodes<T = any> = Record<string, ReactElement<T>>
+export type FlowChartNodes<T = any> = Record<string, ReactElement<T>>;
 
 type ModifiedNodes<T extends FlowChartNodes> = {
   [id in keyof T]: ReactElement<{ "data-fc-id": string }>;
@@ -159,9 +159,9 @@ export function FlowChart<T extends FlowChartNodes<any>>({
             />
           </marker>
         </defs>
-        {paths.map((path) => (
+        {paths.map((path, index) => (
           <Path
-            key={path.id}
+            key={index}
             id={path.id}
             initialPath={path.initialPath}
             endPath={path.endPath}
@@ -183,9 +183,8 @@ const Path = (props: { id: string; initialPath: string; endPath: string }) => {
         d: props.endPath,
       },
       {
-        duration: 1,
+        duration: 1.5,
         ease: [0.25, 0.1, 0.25, 1],
-        delay: 0.5,
       },
     );
   };
@@ -207,16 +206,25 @@ const Path = (props: { id: string; initialPath: string; endPath: string }) => {
 };
 
 const chartBoxCva = cva(
-  "border border-tranparent w-max rounded-lg font-mono text-center",
+  "border border-tranparent w-max rounded-lg font-mono text-center transition-all duration-500",
   {
     variants: {
+      type: {
+        solid: "bg-opacity-100",
+        transparent: "bg-opacity-20",
+      },
       color: {
         transparent: "border-gray-500 bg-background text-foreground",
-        red: "border-red-500 bg-red-500/20 text-foreground",
-        green: "border-green-500 bg-green-500/20 text-foreground",
-        blue: "border-blue-500 bg-blue-500/20 text-foreground",
-        yellow: "border-yellow-500 bg-yellow-500/20 text-foreground",
-        light: "border-border bg-white text-black",
+        red: "border-red-500 bg-red-500 text-foreground",
+        green: "border-green-500 bg-green-500 text-foreground",
+        blue: "border-blue-500 bg-blue-500 text-foreground",
+        yellow: "border-yellow-500 bg-yellow-500 text-foreground",
+        orange: "border-orange-500 bg-orange-500 text-foreground",
+        purple: "border-purple-500 bg-purple-500 text-foreground",
+        pink: "border-pink-500 bg-pink-500 text-foreground",
+        light: "border-border bg-white bg-opacity-100 text-black",
+        white: "border-border bg-white text-black",
+        gray: "border-border bg-gray-500 text-white",
       },
       size: {
         xs: "p-1 text-xs min-w-[50px]",
@@ -228,21 +236,31 @@ const chartBoxCva = cva(
     defaultVariants: {
       color: "transparent",
       size: "default",
+      type: "transparent",
     },
   },
 );
+
+export type RectProps = ComponentProps<typeof motion.div> &
+  VariantProps<typeof chartBoxCva>;
 
 export function Rect({
   className,
   children,
   color,
   size,
+  type,
   ...props
-}: ComponentProps<"div"> & VariantProps<typeof chartBoxCva>) {
+}: ComponentProps<typeof motion.div> & VariantProps<typeof chartBoxCva>) {
   return (
-    <div className={cn(chartBoxCva({ color, size, className }))} {...props}>
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className={cn(chartBoxCva({ color, size, className, type }))}
+      {...props}
+    >
       {children}
-    </div>
+    </motion.div>
   );
 }
 
