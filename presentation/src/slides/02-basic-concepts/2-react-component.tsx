@@ -9,9 +9,7 @@ import { SlideHeading } from "@/components/ui/slide-heading";
 import { SlideText } from "@/components/ui/slide-text";
 import Content from "./2-react-component.code.md";
 import { Code } from "@/components/code";
-import { ReactElement } from "react";
 import { Step } from "@/components/deck";
-console.log(getBlocks(Content));
 
 const { steps } = parseRoot(
   Content,
@@ -26,7 +24,7 @@ const { steps } = parseRoot(
   }),
 );
 
-let codes = steps.map((s) => s.code);
+const codes = steps.map((s) => s.code);
 
 export default function ReactComponent() {
   return (

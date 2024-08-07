@@ -2,8 +2,8 @@
 export class PathBuilder {
   private path: string[] = [];
   private initialPath: string[] = [];
-  private startX: number = 0;
-  private startY: number = 0;
+  private startX = 0;
+  private startY = 0;
 
   moveTo(x: number, y: number) {
     this.path.push(`M${x},${y}`);

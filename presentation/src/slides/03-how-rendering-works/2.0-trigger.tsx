@@ -1,26 +1,5 @@
-import { SlideHeading } from "@/components/ui/slide-heading";
-import Content from "./2-trigger.code.md";
-import { parseRoot, Block, HighlightedCodeBlock } from "codehike/blocks";
-import { z } from "zod";
-import { Code } from "@/components/code";
-import { SlideText } from "@/components/ui/slide-text";
 import { FlowChart, Rect } from "@/components/flow-chart";
 import { SlideSubheading } from "@/components/ui/slide-subheading";
-
-const { steps } = parseRoot(
-  Content,
-  Block.extend({
-    steps: z.array(
-      Block.extend({
-        code: HighlightedCodeBlock.extend({
-          style: z.object({}),
-        }),
-      }),
-    ),
-  }),
-);
-
-const codes = steps.map(({ code }) => code);
 
 export default function Trigger0() {
   return (

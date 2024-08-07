@@ -12,8 +12,7 @@ import {
   useState,
 } from "react";
 
-export interface FlowChartNodes<T = any>
-  extends Record<string, ReactElement<T>> {}
+export type FlowChartNodes<T = any> = Record<string, ReactElement<T>>
 
 type ModifiedNodes<T extends FlowChartNodes> = {
   [id in keyof T]: ReactElement<{ "data-fc-id": string }>;
@@ -76,7 +75,7 @@ export function FlowChart<T extends FlowChartNodes<any>>({
   function generatePaths(
     connections: FlowChartConnection<keyof T, keyof T>[] = [],
   ) {
-    let newPaths: {
+    const newPaths: {
       id: string;
       initialPath: string;
       endPath: string;
@@ -117,7 +116,7 @@ export function FlowChart<T extends FlowChartNodes<any>>({
   }
 
   useEffect(() => {
-    let resizeObservers: ResizeObserver[] = [];
+    const resizeObservers: ResizeObserver[] = [];
 
     function handleResize() {
       setPaths(generatePaths(filteredConnections));

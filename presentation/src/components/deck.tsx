@@ -30,7 +30,6 @@ import {
 } from "framer-motion";
 
 const SLIDE_DISPLAY_NAME = "Slide" as const;
-const SLIDES_DISPLAY_NAME = "Slides" as const;
 const NEXT_KEY = "ArrowRight";
 const PREV_KEY = "ArrowLeft";
 
@@ -42,7 +41,7 @@ interface _Step {
 }
 
 class SlideSteps {
-  private currentIndex: number = 0;
+  private currentIndex = 0;
   private steps: _Step[] = [];
 
   insertStep(step: _Step) {
