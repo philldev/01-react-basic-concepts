@@ -1,10 +1,5 @@
 import z from "zod";
-import {
-  parseRoot,
-  Block,
-  HighlightedCodeBlock,
-  getBlocks,
-} from "codehike/blocks";
+import { parseRoot, Block, HighlightedCodeBlock } from "codehike/blocks";
 import { SlideHeading } from "@/components/ui/slide-heading";
 import { SlideText } from "@/components/ui/slide-text";
 import Content from "./2-react-component.code.md";
