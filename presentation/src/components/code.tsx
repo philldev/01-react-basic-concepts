@@ -63,7 +63,7 @@ export function Code(
     <motion.div
       className={cn(
         "w-max",
-        styled && "rounded-md border-border p-4 border",
+        styled && "rounded-md border-border p-4 border bg-blue-900/10",
         lineNumbers && "pl-2",
         className,
       )}
@@ -109,7 +109,7 @@ import {
 } from "codehike/utils/token-transitions";
 import React from "react";
 
-const MAX_TRANSITION_DURATION = 900; // milliseconds
+const MAX_TRANSITION_DURATION = 2000; // milliseconds
 
 class SmoothPre extends React.Component<CustomPreProps> {
   ref: React.RefObject<HTMLPreElement>;

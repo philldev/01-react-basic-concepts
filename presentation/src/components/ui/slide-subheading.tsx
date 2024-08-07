@@ -11,5 +11,7 @@ export function SlideSubheading({
   ...props
 }: SlideSubheadingProps) {
   const Comp = asChild ? Slot : "h2";
-  return <Comp className={cn("text-4xl font-medium", className)} {...props} />;
+  return (
+    <Comp className={cn("text-3xl font-semibold", className)} {...props} />
+  );
 }

@@ -1,11 +1,11 @@
 import { FlowChart, Rect } from "@/components/flow-chart";
-import Content from "./02.5--react-effects.code.md";
 import { parseRoot, Block, HighlightedCodeBlock } from "codehike/blocks";
 import { z } from "zod";
 import { Code } from "@/components/code";
 import { Step } from "@/components/deck";
 import { SlideHeading } from "@/components/ui/slide-heading";
 import { SlideText } from "@/components/ui/slide-text";
+import Content from "./4-react-effects.code.md";
 
 const { steps } = parseRoot(
   Content,
@@ -22,7 +22,7 @@ const { steps } = parseRoot(
 
 export default function ReactEffects() {
   return (
-    <div className="flex justify-center flex-col h-full">
+    <div className="flex flex-col h-full">
       <SlideHeading className="mb-8">React Effects</SlideHeading>
       <SlideText className="mb-20">
         React Effects are functions that run after every render. They are useful
@@ -68,7 +68,6 @@ export default function ReactEffects() {
 function Examples() {
   return (
     <div>
-      <div className="text-2xl text-foreground/80 mb-4">Examples</div>
       <div className="flex gap-10 text-xl">
         {steps.map((step, index) => (
           <Step

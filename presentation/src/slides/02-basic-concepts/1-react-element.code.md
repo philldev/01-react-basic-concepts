@@ -1,16 +1,3 @@
-## !!steps example-create-element
-
-```js ! example-create-element.js
-// Vanilla JavaScript
-React.createElement(
-  "h1",
-  {
-    className: "greeting",
-  },
-  "Hello, world!",
-);
-```
-
 ## !!steps example-create-element-jsx
 
 ```js ! example-create-element.jsx
@@ -21,6 +8,7 @@ React.createElement(
 ## !!steps example-react-element-object
 
 ```js ! example-create-element.jsx
+// React Element Obj
 {
   type: "h1",
   props: {

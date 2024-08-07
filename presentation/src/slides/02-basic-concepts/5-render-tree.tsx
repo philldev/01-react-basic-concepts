@@ -1,10 +1,9 @@
-import { Step } from "@/components/deck";
 import { FlowChart, FlowChartNodes, Rect } from "@/components/flow-chart";
 import { SlideHeading } from "@/components/ui/slide-heading";
 import { SlideText } from "@/components/ui/slide-text";
-import Content from "./02.6--render-tree.code.md";
 import { parseRoot, Block, HighlightedCodeBlock } from "codehike/blocks";
 import { z } from "zod";
+import Content from "./5-render-tree.code.md";
 import { Code } from "@/components/code";
 
 const { steps } = parseRoot(
@@ -38,28 +37,27 @@ tree.forEach((row, rIndex) => {
 
 export default function RenderTree() {
   return (
-    <div className="flex justify-center flex-col h-full">
+    <div className="flex flex-col h-full">
       <SlideHeading className="mb-8">Render Tree</SlideHeading>
       <div className="flex gap-10 mb-20">
         <SlideText className="flex-1">
           The render tree is a tree-like structure that represents the output of
-          React's render function. It is a hierarchical representation of the
-          components that are rendered on the screen.
+          React's rendering.
         </SlideText>
       </div>
 
-      <div className="flex gap-10">
-        <div className="flex-1">
+      <div className="flex gap-20">
+        <div className="">
           <Code
             code={steps[0].code}
             styled={false}
             lineNumbers={false}
-            className="text-xl"
+            className="text-lg"
           />
         </div>
         <FlowChart
           nodes={nodes}
-          className="font-mono flex flex-1 flex-col gap-20"
+          className="font-mono flex flex-col gap-10"
           connections={[
             ["0-0", "1-0", "bottom_to_top"],
             ["1-0", "2-0", "bottom_to_top"],

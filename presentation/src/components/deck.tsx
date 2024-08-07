@@ -310,7 +310,7 @@ function Slide({
   return (
     <motion.div
       className={cn(
-        "h-screen absolute inset-0 w-screen p-20 overflow-hidden",
+        "h-screen absolute inset-0 w-screen p-20 pt-40 overflow-hidden",
         className,
       )}
       custom={slideTransition}

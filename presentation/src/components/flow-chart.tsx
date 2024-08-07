@@ -212,17 +212,18 @@ const chartBoxCva = cva(
   {
     variants: {
       color: {
-        transparent: "border-border bg-background text-foreground",
+        transparent: "border-gray-500 bg-background text-foreground",
         red: "border-red-500 bg-red-500/20 text-foreground",
         green: "border-green-500 bg-green-500/20 text-foreground",
         blue: "border-blue-500 bg-blue-500/20 text-foreground",
         yellow: "border-yellow-500 bg-yellow-500/20 text-foreground",
+        light: "border-border bg-white text-black",
       },
       size: {
         xs: "p-1 text-xs min-w-[50px]",
         sm: "p-2 text-sm min-w-[75px]",
         default: "p-3",
-        lg: "p-6 text-2xl",
+        lg: "p-6 text-2xl border-2",
       },
     },
     defaultVariants: {

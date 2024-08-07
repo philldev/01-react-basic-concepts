@@ -2,7 +2,7 @@ import { SlideHeading } from "@/components/ui/slide-heading";
 import { SlideText } from "@/components/ui/slide-text";
 import { SVGProps } from "react";
 
-export default function WhatIsReact() {
+export default function IntroTitle() {
   return (
     <div className="flex justify-center flex-col h-full relative">
       <SlideHeading className="mb-8">What is React?</SlideHeading>
