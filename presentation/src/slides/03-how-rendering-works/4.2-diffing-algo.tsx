@@ -8,28 +8,34 @@ import { useOnMount } from "@/hooks/use-onmount";
 import { useState } from "react";
 
 const TreeNodes = {
-  main: (props?: RectProps) => <Rect size="xs" {...props} children="<main/>" />,
-  ul: (props?: RectProps) => <Rect size="xs" {...props} children="<ul/>" />,
-  li: (props?: RectProps) => <Rect size="xs" {...props} children="<li/>" />,
-  div: (props?: RectProps) => <Rect size="xs" {...props} children="<div/>" />,
-  button: (props?: RectProps) => (
-    <Rect size="sm" {...props} children="<button/>" />
+  main: (props?: RectProps, text?: string) => (
+    <Rect size="xs" {...props} children={text ?? "<main/>"} />
+  ),
+  ul: (props?: RectProps, text?: string) => (
+    <Rect size="xs" {...props} children={text ?? "<ul/>"} />
+  ),
+  li: (props?: RectProps, text?: string) => (
+    <Rect size="xs" {...props} children={text ?? "<li/>"} />
+  ),
+  div: (props?: RectProps, text?: string) => (
+    <Rect size="xs" {...props} children={text ?? "<div/>"} />
+  ),
+  button: (props?: RectProps, text?: string) => (
+    <Rect size="sm" {...props} children={text ?? "<button/>"} />
   ),
 };
 
-export default function DiffingAlgo1() {
+export default function DiffingAlgo2() {
   return (
     <div className="flex flex-col h-full">
       <div className="mb-20">
         <SlideSubheading className="text-foreground/80">
           Diffing Algorithm
         </SlideSubheading>
-        <SlideHeading className="mb-10">
-          1. Element of different type
-        </SlideHeading>
+        <SlideHeading className="mb-10">2. Element of same type</SlideHeading>
         <SlideText className="text-muted-foreground">
-          Whenever the root elements have different type react unmount the old
-          tree and create a new tree from scratch.
+          When comparing the same type of elements, React will compare the
+          props, update the changed attributes and keep the old DOM node.
         </SlideText>
       </div>
       <Chart />
@@ -128,48 +134,36 @@ function DomChanges() {
       },
       id: `dom-changes-${1}`,
     });
-
-    deckSteps.addStep(slideIndex, {
-      order: 9,
-      show: () => {
-        setCount(2);
-      },
-      id: `dom-changes-${2}`,
-    });
   });
-
-  const ulLiColors = count > 1 ? "red" : "transparent";
-  const ulColor = count > 1 ? "red" : "yellow";
-
-  const divColor = count > 1 ? "green" : "transparent";
 
   return (
     <FlowChart
       className="flex-1"
       nodes={{
         main: TreeNodes.main(),
-        ul: TreeNodes.ul({ color: ulColor }),
-        li1: TreeNodes.li({ color: ulLiColors }),
-        li2: TreeNodes.li({ color: ulLiColors }),
-        div: TreeNodes.div({ color: divColor }),
-        new_li1: TreeNodes.li({ color: divColor }),
-        new_li2: TreeNodes.li({ color: divColor }),
+        ul: TreeNodes.ul(
+          {
+            color: count === 1 ? "yellow" : "transparent",
+            className: "w-[205px]",
+          },
+          count === 0
+            ? "<ul                      />"
+            : "<ul className='list-disc'/>",
+        ),
+        li1: TreeNodes.li(),
+        li2: TreeNodes.li(),
       }}
       connections={[
         ["ul", "li1", "bottom_to_left"],
         ["ul", "li2", "bottom_to_left"],
-        count === 0
-          ? ["main", "ul", "bottom_to_left"]
-          : ["main", "div", "bottom_to_left"],
-        ["div", "new_li1", "bottom_to_left"],
-        ["div", "new_li2", "bottom_to_left"],
+        ["main", "ul", "bottom_to_left"],
       ]}
       children={(nodes) => (
         <div className="flex flex-col gap-4">
           <Rect color="blue" className="w-full">
             Dom Changes
           </Rect>
-          <Grid className="grid-cols-2 gap-4 gap-x-2 w-max">
+          <Grid className="gap-4 gap-x-2">
             <GridItem col={1} row={1}>
               {nodes.main}
             </GridItem>
@@ -180,17 +174,6 @@ function DomChanges() {
               {nodes.li1}
               {nodes.li2}
             </GridItem>
-            {count > 0 && (
-              <>
-                <GridItem col={2} row={4}>
-                  {nodes.div}
-                </GridItem>
-                <GridItem col={3} row={5} className="flex flex-col gap-2">
-                  {nodes.new_li1}
-                  {nodes.new_li2}
-                </GridItem>
-              </>
-            )}
           </Grid>
         </div>
       )}
@@ -238,10 +221,13 @@ function Compare() {
       className="flex-1 w-full"
       nodes={{
         main: TreeNodes.main({ focus: focus1 === "main" }),
-        div: TreeNodes.div({
-          color: changed ? "yellow" : undefined,
-          focus: focus1 === "div",
-        }),
+        div: TreeNodes.div(
+          {
+            color: changed ? "yellow" : undefined,
+            focus: focus1 === "div",
+          },
+          "<ul className='list-disc'>",
+        ),
         div_li1: TreeNodes.li(),
         div_li2: TreeNodes.li(),
         main_2: TreeNodes.main({ focus: focus2 === "main_2" }),
@@ -263,7 +249,7 @@ function Compare() {
       children={(nodes) => (
         <div className="flex w-full flex-col items-center gap-4">
           <Rect className="w-full">compare(oldTree, newTree)</Rect>
-          <Grid className="grid grid-cols-2 gap-4 gap-x-2 w-max">
+          <Grid className="grid gap-4 gap-x-2 w-max">
             <GridItem col={1} row={1}>
               {nodes.main}
             </GridItem>
@@ -298,7 +284,7 @@ function NewTree() {
       className="flex-1"
       nodes={{
         main: TreeNodes.main(),
-        div: TreeNodes.div(),
+        div: TreeNodes.div({}, "<ul className='list-disc'>"),
         li1: TreeNodes.li(),
         li2: TreeNodes.li(),
       }}
@@ -312,7 +298,7 @@ function NewTree() {
           <Rect color="purple" className="w-full">
             New tree
           </Rect>
-          <Grid className="grid grid-cols-2 gap-4 gap-x-2 w-max">
+          <Grid className="grid gap-4 gap-x-2 w-max">
             <GridItem col={1} row={1}>
               {nodes.main}
             </GridItem>

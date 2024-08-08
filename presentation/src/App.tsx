@@ -16,6 +16,13 @@ import Trigger1 from "./slides/03-how-rendering-works/2.1-trigger";
 import Reconciliation from "./slides/03-how-rendering-works/3-reconciliation";
 import DiffingAlgo from "./slides/03-how-rendering-works/4-diffing-algo";
 import DiffingAlgo1 from "./slides/03-how-rendering-works/4.1-diffing-algo";
+import DiffingAlgo2 from "./slides/03-how-rendering-works/4.2-diffing-algo";
+import DiffingAlgo3 from "./slides/03-how-rendering-works/4.3-diffing-algo";
+import DiffingAlgo4 from "./slides/03-how-rendering-works/4.4-diffing-algo";
+import DiffingAlgo5 from "./slides/03-how-rendering-works/4.5-diffing-algo";
+import DiffingAlgo6 from "./slides/03-how-rendering-works/4.6-diffing-algo";
+import CommitTitle from "./slides/03-how-rendering-works/5-commit";
+import Commit from "./slides/03-how-rendering-works/5.1-commit";
 
 const slides = [
   Cover,
@@ -35,6 +42,13 @@ const slides = [
   Reconciliation,
   DiffingAlgo,
   DiffingAlgo1,
+  DiffingAlgo2,
+  DiffingAlgo3,
+  DiffingAlgo4,
+  DiffingAlgo5,
+  DiffingAlgo6,
+  CommitTitle,
+  Commit,
 ] as const;
 
 function App() {

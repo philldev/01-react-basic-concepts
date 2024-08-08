@@ -1,7 +1,7 @@
 import { PathBuilder } from "@/lib/draw-path";
 import { cn } from "@/lib/utils";
 import { cva, VariantProps } from "class-variance-authority";
-import { motion, useAnimate } from "framer-motion";
+import { Easing, motion, useAnimate, useAnimation } from "framer-motion";
 import {
   ComponentProps,
   ReactElement,
@@ -9,6 +9,7 @@ import {
   useEffect,
   useId,
   useMemo,
+  useRef,
   useState,
 } from "react";
 
@@ -206,7 +207,7 @@ const Path = (props: { id: string; initialPath: string; endPath: string }) => {
 };
 
 const chartBoxCva = cva(
-  "border border-tranparent w-max rounded-lg font-mono text-center transition-all duration-500",
+  "border relative overflow-hidden border-tranparent w-max rounded-lg font-mono text-center transition-all duration-500 outline outline-2 outline-transparent",
   {
     variants: {
       type: {
@@ -232,6 +233,12 @@ const chartBoxCva = cva(
         default: "p-3",
         lg: "p-6 text-2xl border-2",
       },
+      focus: {
+        true: "outline-yellow-500",
+      },
+      bordered: {
+        true: "bg-background",
+      },
     },
     defaultVariants: {
       color: "transparent",
@@ -246,20 +253,85 @@ export type RectProps = ComponentProps<typeof motion.div> &
 
 export function Rect({
   className,
-  children,
   color,
   size,
   type,
+  focus,
+  children,
   ...props
 }: ComponentProps<typeof motion.div> & VariantProps<typeof chartBoxCva>) {
+  const prevChildren =
+    useRef<ComponentProps<typeof motion.div>["children"]>(null);
+
+  useEffect(() => {
+    if (!prevChildren.current) {
+      prevChildren.current = children;
+    }
+  }, [children]);
+
+  const [scope, animate] = useAnimate();
+
+  const newSpanRef = useRef<HTMLSpanElement>(null);
+  const currentSpanRef = useRef<HTMLSpanElement>(null);
+
+  const [_, rerender] = useState(0);
+
+  async function handleAnimation() {
+    const ease = [0.25, 0.1, 0.25, 1] as Easing;
+    const duration = 1;
+
+    const opts = {
+      duration,
+      ease,
+    };
+
+    await Promise.all([
+      animate(
+        newSpanRef.current!,
+        {
+          y: "0",
+        },
+        opts,
+      ),
+      animate(currentSpanRef.current!, { y: "200%" }, opts),
+    ]);
+
+    prevChildren.current = children;
+    rerender((c) => {
+      return c + 1;
+    });
+
+    setTimeout(() => {
+      newSpanRef.current!.style.setProperty("transform", "translateY(-200%)");
+      currentSpanRef.current!.style.setProperty("transform", "translateY(0)");
+    }, 0);
+  }
+
+  useEffect(() => {
+    if (typeof children === "string" && prevChildren.current) {
+      if (prevChildren.current !== children) {
+        handleAnimation();
+      }
+    }
+  }, [children]);
+
   return (
     <motion.div
+      layout
+      ref={scope}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className={cn(chartBoxCva({ color, size, className, type }))}
+      className={cn(chartBoxCva({ color, size, className, type, focus }))}
       {...props}
     >
-      {children}
+      <div className="absolute inset-0 flex items-center justify-center">
+        <motion.span ref={newSpanRef} animate={{ y: "-200%" }}>
+          {children}
+        </motion.span>
+      </div>
+      <motion.span className="flex justify-center w-full" ref={currentSpanRef}>
+        {prevChildren.current ?? children}
+      </motion.span>
     </motion.div>
   );
 }

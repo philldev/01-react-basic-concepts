@@ -34,15 +34,13 @@ export default function ReactEffects() {
         nodes={{
           component: (
             <Rect size="lg" className="text-left">
-              <pre className="text-muted-foreground mb-2">Component</pre>
-              <pre className="text-lg">useEffect(effect)</pre>
+              Rerender
             </Rect>
           ),
 
           rerender: (
             <Rect size="lg" className="text-left">
-              <pre className="text-muted-foreground mb-2">Rerender</pre>
-              <pre className="text-lg">effect()</pre>
+              effect()
             </Rect>
           ),
         }}
