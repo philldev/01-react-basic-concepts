@@ -26,6 +26,8 @@ import Commit from "./slides/03-how-rendering-works/5.1-commit";
 import DemoTitle from "./slides/04-demo/0-demo-title";
 import DemoExample from "./slides/04-demo/1-demo-example";
 import DemoFlow from "./slides/04-demo/2-demo-flow";
+import Summary from "./slides/outro/summary";
+import ThankYou from "./slides/outro/thankyou";
 
 const slides = [
   Cover,
@@ -63,6 +65,8 @@ function App() {
         <Slide key={index} element={<Comp />} />
       ))}
       <Slide className="p-10 px-4" element={<DemoFlow />} />
+      <Slide element={<Summary />} />
+      <Slide element={<ThankYou />} />
     </Deck>
   );
 }

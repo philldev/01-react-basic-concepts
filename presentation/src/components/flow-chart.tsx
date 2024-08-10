@@ -16,7 +16,11 @@ import {
 export type FlowChartNodes<T = any> = Record<string, ReactElement<T>>;
 
 type ModifiedNodes<T extends FlowChartNodes> = {
-  [id in keyof T]: ReactElement<{ "data-fc-id": string }>;
+  [id in keyof T]: ReactElement<{
+    "data-fc-id"?: string;
+    "data-grid-col"?: number;
+    "data-grid-row"?: number;
+  }>;
 };
 
 type PosiblePosition = "top" | "bottom" | "left" | "right";

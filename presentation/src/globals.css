@@ -2,6 +2,17 @@
 @tailwind components;
 @tailwind utilities;
 
+strong {
+  font-weight: bold;
+}
+
+a {
+  color: var(--primary-foreground);
+  font-weight: medium;
+  text-decoration: underline;
+  color: aliceblue !important;
+}
+
 :root {
   --font-mono: "JetBrains Mono", monospace;
   --font-sans: "Geist", sans-serif;

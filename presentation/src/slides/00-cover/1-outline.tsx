@@ -5,6 +5,7 @@ const outlines = [
   "What is React?",
   "React basic concepts",
   "How React Rendering works?",
+  "Demo: Rendering process visualization",
 ];
 
 export default function Outline() {

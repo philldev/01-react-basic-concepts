@@ -6,19 +6,14 @@ import {
   Rect,
   RectProps,
 } from "@/components/flow-chart";
+import { Button } from "@/components/ui/button";
 import { Grid, GridItem } from "@/components/ui/grid";
 import { useOnMount } from "@/hooks/use-onmount";
 import { cn } from "@/lib/utils";
 import { cva, VariantProps } from "class-variance-authority";
 import { AnimatePresence, motion } from "framer-motion";
-import {
-  ComponentProps,
-  ReactNode,
-  SVGProps,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
+import { ComponentProps, ReactNode, SVGProps, useRef, useState } from "react";
 
 const TreeNodeRect = ({ className, size = "xs", ...props }: RectProps) => (
   <Rect
@@ -28,26 +23,89 @@ const TreeNodeRect = ({ className, size = "xs", ...props }: RectProps) => (
   />
 );
 
-const TreeNodes = {
-  main: (props?: RectProps, text?: string) => (
-    <TreeNodeRect {...props} children={text ?? "<main>"} />
-  ),
-  ul: (props?: RectProps, text?: string) => (
-    <TreeNodeRect {...props} children={text ?? "<ul>"} />
-  ),
-  li: (props?: RectProps, text?: string) => (
-    <TreeNodeRect {...props} children={text ?? "<li>"} />
-  ),
-  div: (props?: RectProps, text?: string) => (
-    <TreeNodeRect {...props} children={text ?? "<div>"} />
-  ),
-  button: (props?: RectProps, text?: string) => (
-    <TreeNodeRect {...props} children={text ?? "<button>"} />
-  ),
-  text: (props?: RectProps, text?: string) => (
-    <TreeNodeRect {...props} children={text ?? "<text>"} />
-  ),
-};
+type TreeNodeArrType = [
+  id: string,
+  state: NodeItemState,
+  label: string,
+  [col: number, row: number],
+];
+
+function createTreeNodesFromArr(
+  arr: TreeNodeArrType[],
+  layoutIdPrefix: string = "",
+) {
+  const obj: Record<string, any> = {};
+
+  arr.forEach(([id, state, child, [col = 1, row = 1]]) => {
+    const props = getProps(state);
+    obj[id] = (
+      <TreeNodeRect
+        {...props}
+        children={child}
+        layoutId={layoutIdPrefix + id}
+        data-grid-col={col}
+        data-grid-row={row}
+      />
+    );
+  });
+
+  return obj;
+}
+
+function resetTreeNodes(nodes: TreeNodeArrType[]): TreeNodeArrType[] {
+  return nodes.map(([id, state, label, position]) => [
+    id,
+    "default",
+    label,
+    position,
+  ]);
+}
+
+type NodeItemState =
+  | "mounted"
+  | "unmounted"
+  | "render"
+  | "compare"
+  | "changed"
+  | "compare_changed"
+  | "default";
+
+function getProps(state: NodeItemState) {
+  const props: Record<string, any> = {
+    color: "transparent",
+    className: "",
+    focus: false,
+  };
+
+  switch (state) {
+    case "default":
+      props.color = "transparent";
+      break;
+    case "mounted":
+      props.color = "green";
+      break;
+    case "unmounted":
+      props.color = "red";
+      break;
+    case "render":
+      props.color = "yellow";
+      props.className = "bg-opacity-0";
+      break;
+    case "compare":
+      props.focus = true;
+      break;
+    case "changed":
+      props.color = "yellow";
+      break;
+    case "compare_changed":
+      props.color = "yellow";
+      props.focus = true;
+  }
+
+  return props;
+}
+
+const StateCache = new Map<string, any[]>();
 
 export default function DemoFlow() {
   const { deckSteps, slideIndex } = useDeck();
@@ -62,35 +120,25 @@ export default function DemoFlow() {
 
   const [reconciliationFlowState, setReconciliationFlowState] = useState<{
     components: ComponentFlowItemProps[];
-    renderTreeNodes?: FlowChartProps<any>["nodes"];
+    renderTreeNodes?: TreeNodeArrType[];
     renderTreeConnections?: FlowChartProps<any>["connections"];
-    renderTreeRenderFn?: FlowChartProps<any>["children"];
     active?: boolean;
   }>({
     components: [],
-    renderTreeNodes: {},
+    renderTreeNodes: [],
     renderTreeConnections: [],
-    renderTreeRenderFn: undefined,
     active: false,
   });
 
   const [commitFlowState, setCommitFlowState] = useState<{
     domChanges?: DomChanges[];
-    domTreeNodes?: FlowChartProps<any>["nodes"];
+    domTreeNodes?: TreeNodeArrType[];
     domTreeConnections?: FlowChartProps<any>["connections"];
-    domTreeRenderFn?: FlowChartProps<any>["children"];
     active?: boolean;
   }>({
     domChanges: [],
-    domTreeNodes: {
-      root: TreeNodes.div({}, "<div id='root'>"),
-    },
+    domTreeNodes: [["root", "default", "<div id='root'>", [1, 1]]],
     domTreeConnections: [],
-    domTreeRenderFn: (nodes) => (
-      <Grid className="gap-4 gap-x-2">
-        <GridItem col={1} row={1} children={nodes.root} />
-      </Grid>
-    ),
     active: false,
   });
 
@@ -103,6 +151,7 @@ export default function DemoFlow() {
   useOnMount(() => {
     const getId = (idx: number) => `step-${idx}`;
 
+    StateCache.clear();
     let steps = [
       () =>
         setTriggerFlowState({
@@ -130,63 +179,30 @@ export default function DemoFlow() {
           active: false,
         }));
 
+        const newComponents = [
+          [
+            "<Post />",
+            [["post = null"], ["loading = true"]],
+            [["getPost()", true]],
+          ],
+          ["<LoadingSpinner />"],
+        ] as ComponentArrType[];
+
+        const newNodes = [
+          ["post", "render", "<Post />", [1, 1]],
+          ["loadingSpinner", "render", "<LoadingSpinner />", [2, 2]],
+          ["svg", "render", "<svg />", [3, 3]],
+        ] as TreeNodeArrType[];
+
         setReconciliationFlowState((prev) => ({
           ...prev,
           active: true,
-          components: [
-            {
-              id: "1",
-              name: "<Post />",
-              states: [
-                { id: "1", label: "post = null" },
-                { id: "2", label: "loading = true" },
-              ],
-              effects: [
-                {
-                  id: "1",
-                  label: "getPost()",
-                  loading: true,
-                },
-              ],
-            },
-            {
-              id: "2",
-              name: "<LoadingSpinner />",
-            },
-          ],
-          renderTreeNodes: {
-            post: TreeNodes.div(
-              {
-                color: "green",
-                className: "bg-opacity-0",
-              },
-              "<Post />",
-            ),
-            loadingSpinner: TreeNodes.div(
-              {
-                color: "green",
-                className: "bg-opacity-0",
-              },
-              "<LoadingSpinner />",
-            ),
-            svg: TreeNodes.div(
-              {
-                color: "green",
-              },
-              "<svg />",
-            ),
-          },
+          components: createComponentFromArr(newComponents),
+          renderTreeNodes: newNodes,
           renderTreeConnections: [
             ["post", "loadingSpinner", "bottom_to_left"],
             ["loadingSpinner", "svg", "bottom_to_left"],
           ],
-          renderTreeRenderFn: (nodes) => (
-            <Grid className="gap-4 gap-x-2">
-              <GridItem col={1} row={1} children={nodes.post} />
-              <GridItem col={2} row={2} children={nodes.loadingSpinner} />
-              <GridItem col={3} row={3} children={nodes.svg} />
-            </Grid>
-          ),
         }));
       },
 
@@ -194,36 +210,26 @@ export default function DemoFlow() {
         setReconciliationFlowState((prev) => ({
           ...prev,
           active: false,
-          renderTreeNodes: {
-            ...Object.fromEntries(
-              Object.entries(prev.renderTreeNodes ?? {}).map(
-                ([id, node]: [string, any]) => {
-                  return [
-                    id,
-                    TreeNodes.div(
-                      {
-                        ...node.props,
-                        color: "transparent",
-                      },
-                      node.props.children,
-                    ),
-                  ];
-                },
-              ),
-            ),
-          },
+          renderTreeNodes: prev.renderTreeNodes?.map(
+            ([id, _, label, position]) => [id, "mounted", label, position],
+          ),
+        }));
+      },
+      () => {
+        const newChanges: DomChangesArrType[] = [
+          ["mounted", "<svg/>", "root.appendChild(svg)"],
+        ];
+
+        setReconciliationFlowState((prev) => ({
+          ...prev,
+          active: false,
+          renderTreeNodes: resetTreeNodes(prev.renderTreeNodes ?? []),
         }));
 
         setCommitFlowState((prev) => ({
           ...prev,
           active: true,
-          domChanges: [
-            {
-              id: "1",
-              content: <Rect size="xs" color="green" children="<svg/>" />,
-              codeLabel: "root.appendChild(svg)",
-            },
-          ],
+          domChanges: createDomChangesFromArr(newChanges),
         }));
       },
 
@@ -231,25 +237,14 @@ export default function DemoFlow() {
         setCommitFlowState((prev) => ({
           ...prev,
           active: true,
-          domChanges: prev.domChanges?.map((d) =>
-            d.id === "1" ? { ...d, active: true } : d,
-          ),
-          domTreeNodes: {
-            root: prev.domTreeNodes?.root,
-            svg: TreeNodes.div(
-              {
-                color: "green",
-              },
-              "<svg />",
-            ),
-          },
+          domChanges: updateDomChanges(prev.domChanges ?? [], "1", {
+            active: true,
+          }),
+          domTreeNodes: [
+            ...(prev.domTreeNodes ?? []),
+            ["svg", "mounted", "<svg />", [2, 2]],
+          ],
           domTreeConnections: [["root", "svg", "bottom_to_left"]],
-          domTreeRenderFn: (nodes) => (
-            <Grid className="gap-4 gap-x-2">
-              <GridItem col={1} row={1} children={nodes.root} />
-              <GridItem col={2} row={2} children={nodes.svg} />
-            </Grid>
-          ),
         }));
       },
 
@@ -260,16 +255,13 @@ export default function DemoFlow() {
           ...prev,
           active: false,
           domChanges: [],
-          domTreeNodes: {
-            root: prev.domTreeNodes?.root,
-            svg: TreeNodes.div(
-              {
-                color: "transparent",
-              },
-              "<svg />",
-            ),
-          },
+          domTreeNodes: resetTreeNodes(prev.domTreeNodes ?? []),
         }));
+      },
+
+      () => {
+        // add 2 events in trigger flow: setPost(postData) and setLoading(true)
+        // activate trigger flow
 
         setReconciliationFlowState((prev) => ({
           ...prev,
@@ -278,17 +270,14 @@ export default function DemoFlow() {
               ? {
                   ...c,
                   effects: c.effects?.map((e) =>
-                    e.id === "1" ? { ...e, loading: false, disabled: true } : e,
+                    e.id === "getPost()"
+                      ? { ...e, loading: false, disabled: true }
+                      : e,
                   ),
                 }
               : c,
           ),
         }));
-      },
-
-      () => {
-        // add 2 events in trigger flow: setPost(postData) and setLoading(true)
-        // activate trigger flow
 
         setTriggerFlowState((prev) => ({
           ...prev,
@@ -317,16 +306,12 @@ export default function DemoFlow() {
           ...prev,
           active: true,
           // set the render tree node post node color to green and bg opacity to 0
-          renderTreeNodes: {
-            ...prev.renderTreeNodes,
-            post: TreeNodes.div(
-              {
-                color: "yellow",
-                className: "bg-opacity-0",
-              },
-              "<Post />",
-            ),
-          },
+          renderTreeNodes: prev.renderTreeNodes?.map(
+            ([id, state, label, pos]) => {
+              if (id === "post") return [id, "render", label, pos];
+              return [id, state, label, pos];
+            },
+          ),
           components: prev.components.map((c) =>
             c.id === "1"
               ? {
@@ -350,15 +335,23 @@ export default function DemoFlow() {
 
         setReconciliationFlowState((prev) => ({
           ...prev,
-          renderTreeNodes: {
-            ...prev.renderTreeNodes,
-            main: TreeNodes.div({}, "<main />"),
-            h1: TreeNodes.div({}, "<h1 />"),
-            p: TreeNodes.div({}, "<p />"),
-            p2: TreeNodes.div({}, "<p />"),
-            img: TreeNodes.div({}, "<img />"),
-            likeButton: TreeNodes.div({}, "<LikeButton />"),
-          },
+          renderTreeNodes: [
+            ...(prev.renderTreeNodes ?? []),
+            ["main", "render", "<main />", [2, 4]],
+            ["h1", "render", "<h1 />", [3, 5]],
+            ["p", "render", "<p />", [3, 6]],
+            ["img", "render", "<img />", [3, 7]],
+            ["p2", "render", "<p />", [3, 8]],
+            ["likeButton", "render", "<LikeButton />", [3, 9]],
+            [
+              "likeButton_button",
+              "render",
+              '<button className="outline" />',
+              [4, 10],
+            ],
+            ["svg_heart_outline", "render", "<svg />", [5, 11]],
+            ["likeButton_span", "render", "<span>100</span>", [5, 12]],
+          ],
           renderTreeConnections: [
             ...(prev.renderTreeConnections ?? []),
             ["main", "h1", "bottom_to_left"],
@@ -366,179 +359,13 @@ export default function DemoFlow() {
             ["main", "img", "bottom_to_left"],
             ["main", "p2", "bottom_to_left"],
             ["main", "likeButton", "bottom_to_left"],
-          ],
-          renderTreeRenderFn: (nodes) => (
-            <Grid className="gap-4 gap-x-2">
-              <GridItem col={1} row={1} children={nodes.post} />
-              <GridItem col={2} row={2} children={nodes.loadingSpinner} />
-              <GridItem col={3} row={3} children={nodes.svg} />
-              <GridItem col={2} row={4} children={nodes.main} />
-              <GridItem col={3} row={5} children={nodes.h1} />
-              <GridItem col={3} row={6} children={nodes.p} />
-              <GridItem col={3} row={7} children={nodes.img} />
-              <GridItem col={3} row={8} children={nodes.p2} />
-              <GridItem col={3} row={9} children={nodes.likeButton} />
-            </Grid>
-          ),
-        }));
-      },
-
-      () => {
-        // set reconciliation flow loading spinner node & main node color to yellow
-        // activate reconciliation flow
-
-        setReconciliationFlowState((prev) => ({
-          ...prev,
-          renderTreeNodes: {
-            ...prev.renderTreeNodes,
-            loadingSpinner: TreeNodes.div(
-              {
-                focus: true,
-              },
-              "<LoadingSpinner />",
-            ),
-            main: TreeNodes.div(
-              {
-                focus: true,
-              },
-              "<main />",
-            ),
-          },
-        }));
-      },
-
-      () => {
-        // set reconciliation flow loading spinner node & main node color to yellow
-
-        setReconciliationFlowState((prev) => ({
-          ...prev,
-          renderTreeNodes: {
-            ...prev.renderTreeNodes,
-            loadingSpinner: TreeNodes.div(
-              {
-                color: "yellow",
-              },
-              "<LoadingSpinner />",
-            ),
-            main: TreeNodes.div(
-              {
-                color: "yellow",
-              },
-              "<main />",
-            ),
-          },
-        }));
-      },
-
-      () => {
-        // swap recon flow post to loading spinner connection to main
-        // set loading spinner & svg node color to red
-        // set main, h1, p, img, p, LikeButton color to green
-
-        const unmounted = ["loadingSpinner", "svg"];
-        const mounted = ["main", "h1", "p", "img", "p2", "likeButton"];
-
-        setReconciliationFlowState((prev) => ({
-          ...prev,
-          // remove loading spinner component
-          components: prev.components.filter((c) => c.id !== "2"),
-          renderTreeNodes: {
-            ...prev.renderTreeNodes,
-            ...Object.fromEntries(
-              Object.entries(prev.renderTreeNodes ?? {}).map(
-                ([id, node]: [string, any]) => {
-                  return [
-                    id,
-                    TreeNodes.div(
-                      {
-                        ...node.props,
-                        layoutId: id,
-                        color: mounted.includes(id)
-                          ? "green"
-                          : unmounted.includes(id)
-                            ? "red"
-                            : "transparent",
-                      },
-                      node.props.children,
-                    ),
-                  ];
-                },
-              ),
-            ),
-          },
-          renderTreeRenderFn: (nodes) => (
-            <Grid className="gap-4 gap-x-2">
-              <GridItem col={1} row={1} children={nodes.post} />
-              <GridItem col={2} row={2} children={nodes.loadingSpinner} />
-              <GridItem col={3} row={3} children={nodes.svg} />
-              <GridItem col={2} row={4} children={nodes.main} />
-              <GridItem col={3} row={5} children={nodes.h1} />
-              <GridItem col={3} row={6} children={nodes.p} />
-              <GridItem col={3} row={7} children={nodes.img} />
-              <GridItem col={3} row={8} children={nodes.p2} />
-              <GridItem col={3} row={9} children={nodes.likeButton} />
-              <GridItem col={4} row={10} children={nodes.likeButton_button} />
-              <GridItem col={5} row={11} children={nodes.svg_heart_outline} />
-              <GridItem col={5} row={12} children={nodes.likeButton_span} />
-            </Grid>
-          ),
-          renderTreeConnections: [
-            // @ts-ignore
-            ...prev.renderTreeConnections?.map((c) =>
-              c[0] === "post" ? ["post", "main", "bottom_to_left"] : c,
-            ),
             ["likeButton", "likeButton_button", "bottom_to_left"],
             ["likeButton_button", "likeButton_span", "bottom_to_left"],
             ["likeButton_button", "svg_heart_outline", "bottom_to_left"],
           ],
-        }));
-      },
-
-      () => {
-        // set likeButton node focus to true
-        // add new component to recon flow: name: <LikeButton />, states: [liked = false]
-
-        setReconciliationFlowState((prev) => ({
-          ...prev,
-          renderTreeNodes: {
-            ...prev.renderTreeNodes,
-            likeButton: TreeNodes.div(
-              {
-                focus: true,
-                layoutId: "likeButton",
-              },
-              "<LikeButton />",
-            ),
-            likeButton_button: TreeNodes.div(
-              {
-                color: "green",
-                layoutId: "likeButton_button",
-              },
-              "<button className='outline' />",
-            ),
-            likeButton_span: TreeNodes.div(
-              {
-                color: "green",
-                layoutId: "likeButton_span",
-              },
-              "<span>100</span>",
-            ),
-            svg_heart_outline: TreeNodes.div(
-              {
-                color: "green",
-                layoutId: "svg_heart_outline",
-              },
-              "<svg />",
-            ),
-          },
-          connections: [
-            ...(prev.renderTreeConnections ?? []),
-            ["likeButton", "likeButton_button", "bottom_to_left"],
-            ["likeButton", "likeButton_span", "bottom_to_left"],
-            ["likeButton", "svg_heart_outline", "bottom_to_left"],
-          ],
           components: [
             ...prev.components,
+
             {
               id: "likeButton",
               name: "<LikeButton />",
@@ -550,57 +377,103 @@ export default function DemoFlow() {
       },
 
       () => {
+        // set reconciliation flow loading spinner node & main node color to yellow
+        // activate reconciliation flow
+
+        const compare = ["loadingSpinner", "main"];
+
+        setReconciliationFlowState((prev) => ({
+          ...prev,
+          renderTreeNodes: prev.renderTreeNodes?.map(
+            ([id, state, label, pos]) => {
+              if (compare.includes(id)) return [id, "compare", label, pos];
+              return [id, state, label, pos];
+            },
+          ),
+        }));
+      },
+
+      () => {
+        // set reconciliation flow loading spinner node & main node color to yellow
+
+        const changed = ["loadingSpinner", "main"];
+
+        setReconciliationFlowState((prev) => ({
+          ...prev,
+          renderTreeNodes: prev.renderTreeNodes?.map(
+            ([id, state, label, pos]) => {
+              if (changed.includes(id)) return [id, "changed", label, pos];
+              return [id, state, label, pos];
+            },
+          ),
+        }));
+      },
+
+      () => {
+        // swap recon flow post to loading spinner connection to main
+        // set loading spinner & svg node color to red
+        // set main, h1, p, img, p, LikeButton color to green
+
+        const unmounted = ["loadingSpinner", "svg"];
+        const mounted = [
+          "main",
+          "h1",
+          "p",
+          "img",
+          "p2",
+          "likeButton",
+          "likeButton_button",
+          "svg_heart_outline",
+          "likeButton_span",
+        ];
+
+        setReconciliationFlowState((prev) => ({
+          ...prev,
+          // remove loading spinner component
+          components: prev.components.filter(
+            (c) => c.name !== "<LoadingSpinner />",
+          ),
+          renderTreeNodes: prev.renderTreeNodes?.map(
+            ([id, state, label, pos]) => {
+              if (unmounted.includes(id)) return [id, "unmounted", label, pos];
+              if (mounted.includes(id)) return [id, "mounted", label, pos];
+              return [id, state, label, pos];
+            },
+          ),
+          renderTreeConnections: [
+            // @ts-ignore
+            ...prev.renderTreeConnections?.map((c) =>
+              c[0] === "post" ? ["post", "main", "bottom_to_left"] : c,
+            ),
+          ],
+        }));
+      },
+
+      () => {
+        const changes = [
+          ["red", "<svg/>", "root.replaceChild(svg, main)"],
+          ["green", "<main/>", "main.appendChild(h1)"],
+          ["green", "<h1/>", "main.appendChild(p)"],
+          ["green", "<p/>", "main.appendChild(img)"],
+          ["green", "<img/>", "main.appendChild(p)"],
+          ["green", "<p/>", "main.appendChild(LikeButton)"],
+          ["green", "<button/>", "main.appendChild(button)"],
+          ["green", "<svg/>", "button.appendChild(svg)"],
+          ["green", "<span/>", "button.appendChild(span)"],
+        ].map(([color, content, codeLabel], i) => ({
+          id: `${i + 1}`,
+          // @ts-ignore
+          content: <Rect size="xs" color={color} children={content} />,
+          codeLabel,
+        })) as DomChanges[];
+
         setCommitFlowState((prev) => ({
           ...prev,
           active: true,
-          domChanges: [
-            {
-              id: "1",
-              content: <Rect size="xs" color="red" children="<svg/>" />,
-              codeLabel: "root.replaceChild(svg, main)",
-            },
-            {
-              id: "2",
-              content: <Rect size="xs" color="green" children="<main/>" />,
-              codeLabel: "root.replaceChild(svg, main)",
-            },
-            {
-              id: "3",
-              content: <Rect size="xs" color="green" children="<h1/>" />,
-              codeLabel: "main.appendChild(h1)",
-            },
-            {
-              id: "4",
-              content: <Rect size="xs" color="green" children="<p/>" />,
-              codeLabel: "main.appendChild(p)",
-            },
-            {
-              id: "5",
-              content: <Rect size="xs" color="green" children="<img/>" />,
-              codeLabel: "main.appendChild(img)",
-            },
-            {
-              id: "6",
-              content: <Rect size="xs" color="green" children="<p/>" />,
-              codeLabel: "main.appendChild(p)",
-            },
-            {
-              id: "8",
-              content: <Rect size="xs" color="green" children="<button />" />,
-              codeLabel: "main.appendChild(button)",
-            },
-            {
-              id: "10",
-              content: <Rect size="xs" color="green" children="<svg/>" />,
-              codeLabel: "button.appendChild(svg)",
-            },
-            {
-              id: "9",
-              content: <Rect size="xs" color="green" children="<span/>" />,
-              codeLabel: "button.appendChild(span)",
-            },
-          ],
+          domChanges: changes,
         }));
+
+        const unmounted = ["loadingSpinner", "svg"];
 
         setReconciliationFlowState((prev) => ({
           ...prev,
@@ -610,42 +483,18 @@ export default function DemoFlow() {
             states: c.states?.map((s) => ({ ...s, newState: false })),
             active: false,
           })),
-          renderTreeNodes: {
-            ...Object.fromEntries(
-              Object.entries(prev.renderTreeNodes ?? {}).map(
-                ([id, node]: [string, any]) => {
-                  return [
-                    id,
-                    TreeNodes.div(
-                      {
-                        ...node.props,
-                        focus: false,
-                        color: "transparent",
-                      },
-                      node.props.children,
-                    ),
-                  ];
-                },
-              ),
-            ),
-          },
-          renderTreeRenderFn: (nodes) => (
-            <Grid className="gap-4 gap-x-2">
-              <GridItem col={1} row={1} children={nodes.post} />
-              <GridItem col={2} row={2} children={nodes.main} />
-              <GridItem col={3} row={3} children={nodes.h1} />
-              <GridItem col={3} row={4} children={nodes.p} />
-              <GridItem col={3} row={5} children={nodes.img} />
-              <GridItem col={3} row={6} children={nodes.p2} />
-              <GridItem col={3} row={7} children={nodes.likeButton} />
-              <GridItem col={4} row={8} children={nodes.likeButton_button} />
-              <GridItem col={5} row={9} children={nodes.svg_heart_outline} />
-              <GridItem col={5} row={10} children={nodes.likeButton_span} />
-            </Grid>
-          ),
+          renderTreeNodes: resetTreeNodes(prev.renderTreeNodes ?? [])
+            .filter(([id]) => !unmounted.includes(id))
+            .map(([id, state, content, pos]) => {
+              const newPos = [pos[0], pos[1] - unmounted.length] as [
+                number,
+                number,
+              ];
+              return [id, state, content, newPos];
+            }),
         }));
       },
-      ...new Array(10).fill(null).map((_, index) => () => {
+      ...new Array(9).fill(null).map((_, index) => () => {
         setCommitFlowState((prev) => ({
           ...prev,
           domChanges: prev.domChanges?.map((c, i) => ({
@@ -657,138 +506,61 @@ export default function DemoFlow() {
         if (index === 0) {
           setCommitFlowState((prev) => ({
             ...prev,
-            domTreeNodes: {
-              root: prev.domTreeNodes?.root,
-              svg: TreeNodes.div(
-                {
-                  color: "red",
-                },
-                "<svg />",
-              ),
-              main: TreeNodes.div(
-                {
-                  color: "green",
-                  className: "opacity-[0!important]",
-                  layoutId: "dom_main",
-                },
-                "<main />",
-              ),
-              h1: TreeNodes.div(
-                {
-                  color: "green",
-                  className: "opacity-[0!important]",
-                  layoutId: "dom_h1",
-                },
-                "<h1 />",
-              ),
-              p: TreeNodes.div(
-                {
-                  color: "green",
-                  className: "opacity-[0!important]",
-                  layoutId: "dom_p",
-                },
-                "<p />",
-              ),
-              img: TreeNodes.div(
-                {
-                  color: "green",
-                  className: "opacity-[0!important]",
-                  layoutId: "dom_img",
-                },
-                "<img />",
-              ),
-              p2: TreeNodes.div(
-                {
-                  color: "green",
-                  className: "opacity-[0!important]",
-                  layoutId: "dom_p2",
-                },
-                "<p />",
-              ),
-              likeButton_button: TreeNodes.div(
-                {
-                  color: "green",
-                  className: "opacity-[0!important]",
-                  layoutId: "dom_likeButton_button",
-                },
-                "<button className='outline'/>",
-              ),
-              likeButton_span: TreeNodes.div(
-                {
-                  color: "green",
-                  className: "opacity-[0!important]",
-                  layoutId: "dom_likeButton_span",
-                },
-                "<span>100</span>",
-              ),
-              svg_heart_outline: TreeNodes.div(
-                {
-                  color: "green",
-                  className: "opacity-[0!important]",
-                  layoutId: "dom_svg_heart_outline",
-                },
-                "<svg />",
-              ),
-            },
-            domTreeRenderFn: (nodes) => (
-              <Grid className="gap-4 gap-x-2">
-                <GridItem col={1} row={1} children={nodes.root} />
-                <GridItem col={2} row={2} children={nodes.svg} />
-                <GridItem col={2} row={3} children={nodes.main} />
-                <GridItem col={3} row={4} children={nodes.h1} />
-                <GridItem col={3} row={5} children={nodes.p} />
-                <GridItem col={3} row={6} children={nodes.img} />
-                <GridItem col={3} row={7} children={nodes.p2} />
-                <GridItem col={4} row={8} children={nodes.likeButton_button} />
-                <GridItem col={5} row={9} children={nodes.svg_heart_outline} />
-                <GridItem col={5} row={10} children={nodes.likeButton_span} />
-              </Grid>
-            ),
+            domTreeNodes: [
+              ...(prev.domTreeNodes?.map(([id, state, label, pos]) => {
+                if (id === "svg") return [id, "unmounted", label, pos];
+                return [id, state, label, pos];
+              }) as TreeNodeArrType[]),
+            ],
           }));
         }
 
         let subSteps = [
-          ["h1", "<h1 />", ["main", "h1", "bottom_to_left"]],
-          ["p", "<p />", ["main", "p", "bottom_to_left"]],
-          ["img", "<img />", ["main", "img", "bottom_to_left"]],
-          ["p2", "<p />", ["main", "p2", "bottom_to_left"]],
           [
-            "likeButton_button",
-            "<button className='outline' />",
+            ["h1", "mounted", "<h1 />", [3, 4]],
+            ["main", "h1", "bottom_to_left"],
+          ],
+          [
+            ["p", "mounted", "<p />", [3, 5]],
+            ["main", "p", "bottom_to_left"],
+          ],
+          [
+            ["img", "mounted", "<img />", [3, 6]],
+            ["main", "img", "bottom_to_left"],
+          ],
+          [
+            ["p2", "mounted", "<p />", [3, 7]],
+            ["main", "p2", "bottom_to_left"],
+          ],
+          [
+            [
+              "likeButton_button",
+              "mounted",
+              "<button className='outline'/>",
+              [3, 8],
+            ],
             ["main", "likeButton_button", "bottom_to_left"],
           ],
           [
-            "svg_heart_outline",
-            "<svg />",
+            ["svg_heart_outline", "mounted", "<svg />", [4, 9]],
             ["likeButton_button", "svg_heart_outline", "bottom_to_left"],
           ],
           [
-            "likeButton_span",
-            "<span>100</span>",
+            ["likeButton_span", "mounted", "<span>100</span>", [4, 10]],
             ["likeButton_button", "likeButton_span", "bottom_to_left"],
           ],
         ] as const;
 
-        subSteps.forEach(([id, content, connections], i) => {
+        subSteps.forEach(([node, connection], i) => {
           if (i === index - 2) {
             // @ts-ignore
             setCommitFlowState((prev) => ({
               ...prev,
               domTreeConnections: [
                 ...(prev.domTreeConnections ?? []),
-                connections,
+                connection,
               ],
-              domTreeNodes: {
-                ...prev.domTreeNodes,
-                [id]: TreeNodes.div(
-                  {
-                    color: "green",
-                    className: "opacity-100",
-                    layoutId: `dom_${id}`,
-                  },
-                  content,
-                ),
-              },
+              domTreeNodes: [...(prev.domTreeNodes ?? []), node],
             }));
           }
         });
@@ -800,16 +572,10 @@ export default function DemoFlow() {
               ["root", "main", "bottom_to_left"],
               ...(prev.domTreeConnections?.slice(1) ?? []),
             ],
-            domTreeNodes: {
-              ...prev.domTreeNodes,
-              main: TreeNodes.div(
-                {
-                  color: "green",
-                  className: "opacity-100",
-                },
-                "<main />",
-              ),
-            },
+            domTreeNodes: [
+              ...(prev.domTreeNodes ?? []),
+              ["main", "mounted", "<main />", [2, 3]],
+            ],
           }));
         }
       }),
@@ -819,38 +585,13 @@ export default function DemoFlow() {
         setCommitFlowState((prev) => ({
           ...prev,
           active: false,
-          domTreeNodes: {
-            ...Object.fromEntries(
-              Object.entries(prev.domTreeNodes ?? {}).map(
-                ([id, node]: [string, any]) => {
-                  return [
-                    id,
-                    TreeNodes.div(
-                      {
-                        ...node.props,
-                        color: "tranparent",
-                      },
-                      node.props.children,
-                    ),
-                  ];
-                },
-              ),
-            ),
-          },
+          domTreeNodes: resetTreeNodes(prev.domTreeNodes ?? [])
+            .filter((t) => t[0] !== "svg")
+            .map(([id, state, content, pos]) => {
+              const newPos = [pos[0], pos[1] - 1] as [number, number];
+              return [id, state, content, newPos];
+            }),
           domChanges: [],
-          domTreeRenderFn: (nodes) => (
-            <Grid className="gap-4 gap-x-2">
-              <GridItem col={1} row={1} children={nodes.root} />
-              <GridItem col={2} row={2} children={nodes.main} />
-              <GridItem col={3} row={3} children={nodes.h1} />
-              <GridItem col={3} row={4} children={nodes.p} />
-              <GridItem col={3} row={5} children={nodes.img} />
-              <GridItem col={3} row={6} children={nodes.p2} />
-              <GridItem col={4} row={7} children={nodes.likeButton_button} />
-              <GridItem col={5} row={8} children={nodes.svg_heart_outline} />
-              <GridItem col={5} row={9} children={nodes.likeButton_span} />
-            </Grid>
-          ),
         }));
       },
     ];
@@ -890,6 +631,12 @@ export default function DemoFlow() {
         setReconciliationFlowState((prev) => ({
           ...prev,
           active: true,
+          renderTreeNodes: [
+            ...(prev.renderTreeNodes?.map(([id, state, label, pos]) => {
+              if (id === "likeButton") return [id, "render", label, pos];
+              return [id, state, label, pos];
+            }) as TreeNodeArrType[]),
+          ],
           components: prev.components.map((c) =>
             c.id === "likeButton"
               ? {
@@ -903,95 +650,46 @@ export default function DemoFlow() {
       () => {
         setReconciliationFlowState((prev) => ({
           ...prev,
-          active: true,
-          renderTreeNodes: {
-            ...Object.fromEntries(
-              Object.entries(prev.renderTreeNodes ?? {}).map(
-                ([id, node]: [string, any]) => {
-                  return [
-                    id,
-                    TreeNodes.div(
-                      {
-                        ...node.props,
-                        color: "transparent",
-                        focus: id === "likeButton",
-                      },
-                      node.props.children,
-                    ),
-                  ];
-                },
-              ),
-            ),
-            likeButton_button_2: TreeNodes.div(
-              {},
+          renderTreeNodes: [
+            ...(prev.renderTreeNodes ?? []),
+            [
+              "likeButton_button_2",
+              "render",
               "<button className='filled' />",
-            ),
-            likeButton_span_2: TreeNodes.div({}, "<span>101</span>"),
-
-            svg_heart_outline_2: TreeNodes.div({}, "<svg />"),
-          },
-        }));
-      },
-      () => {
-        setReconciliationFlowState((prev) => ({
-          ...prev,
+              [4, 11],
+            ],
+            ["svg_heart_outline_2", "render", "<svg />", [5, 12]],
+            ["likeButton_span_2", "render", "<span>101</span>", [5, 13]],
+          ],
           renderTreeConnections: [
             ...(prev.renderTreeConnections ?? []),
             ["likeButton_button_2", "likeButton_span_2", "bottom_to_left"],
             ["likeButton_button_2", "svg_heart_outline_2", "bottom_to_left"],
           ],
-          renderTreeRenderFn: (nodes) => (
-            <Grid className="gap-4 gap-x-2">
-              <GridItem col={1} row={1} children={nodes.post} />
-              <GridItem col={2} row={2} children={nodes.main} />
-              <GridItem col={3} row={3} children={nodes.h1} />
-              <GridItem col={3} row={4} children={nodes.p} />
-              <GridItem col={3} row={5} children={nodes.img} />
-              <GridItem col={3} row={6} children={nodes.p2} />
-              <GridItem col={3} row={7} children={nodes.likeButton} />
-              <GridItem col={4} row={8} children={nodes.likeButton_button} />
-              <GridItem col={5} row={9} children={nodes.svg_heart_outline} />
-              <GridItem col={5} row={10} children={nodes.likeButton_span} />
-              <GridItem col={4} row={11} children={nodes.likeButton_button_2} />
-              <GridItem col={5} row={12} children={nodes.svg_heart_outline_2} />
-              <GridItem col={5} row={13} children={nodes.likeButton_span_2} />
-            </Grid>
-          ),
         }));
       },
       ...[
-        ["likeButton_button", "likeButton_button_2", "tranparent"],
-        ["likeButton_button", "likeButton_button_2", "yellow"],
-        ["svg_heart_outline", "svg_heart_outline_2", "transparent"],
-        ["likeButton_span", "likeButton_span_2", "transparent"],
-        ["likeButton_span", "likeButton_span_2", "yellow"],
-      ].map((item, index) => async () => {
+        ["likeButton_button", "likeButton_button_2", "compare"],
+        [
+          "likeButton_button",
+          "likeButton_button_2",
+          "changed",
+          "<button className='filled' />",
+        ],
+        ["svg_heart_outline", "svg_heart_outline_2", "compare"],
+        ["svg_heart_outline", "svg_heart_outline_2", "default"],
+        ["likeButton_span", "likeButton_span_2", "compare"],
+        ["likeButton_span", "likeButton_span_2", "changed", "<span>101</span>"],
+      ].map((item) => async () => {
         setReconciliationFlowState((prev) => ({
           ...prev,
-          renderTreeNodes: {
-            ...Object.fromEntries(
-              Object.entries(prev.renderTreeNodes ?? {}).map(
-                ([id, node]: [string, any]) => {
-                  return [
-                    id,
-                    TreeNodes.div(
-                      {
-                        ...node.props,
-                        focus: id === item[0] || id === item[1],
-                        color:
-                          id === item[0] || id === item[1]
-                            ? item[2]
-                            : node.props.color,
-                      },
-                      item[2] === "yellow" && id === item[0]
-                        ? prev.renderTreeNodes[item[1]].props.children
-                        : node.props.children,
-                    ),
-                  ];
-                },
-              ),
-            ),
-          },
+          renderTreeNodes: [
+            ...(prev.renderTreeNodes?.map(([id, state, label, pos]) => {
+              if (id === item[0] || id === item[1])
+                return [id, item[2], item[3] ?? label, pos];
+              return [id, state, label, pos];
+            }) as TreeNodeArrType[]),
+          ],
         }));
       }),
       () => {
@@ -1004,67 +702,44 @@ export default function DemoFlow() {
         setReconciliationFlowState((prev) => ({
           ...prev,
           active: false,
-          renderTreeNodes: {
-            ...Object.fromEntries(
-              Object.entries(prev.renderTreeNodes ?? {})
-                .filter(([id]) => !removedNodes.includes(id))
-                .map(([id, node]: [string, any]) => [
-                  id,
-                  TreeNodes.div(
-                    {
-                      ...node.props,
-                      focus: false,
-                      color: "transparent",
-                    },
-                    node.props.children,
-                  ),
-                ]),
-            ),
-          },
+          renderTreeNodes: resetTreeNodes(prev.renderTreeNodes ?? []).filter(
+            ([id]) => !removedNodes.includes(id),
+          ),
         }));
+
+        const domChanges: DomChangesArrType[] = [
+          [
+            "changed",
+            "<button />",
+            "button.setAttribute('className', 'filled')",
+          ],
+          ["changed", "<span/>", "span.innerText = '101'"],
+        ];
 
         setCommitFlowState((prev) => ({
           ...prev,
           active: true,
-          domChanges: [
-            {
-              id: "1",
-              content: <Rect size="xs" color="yellow" children="<button />" />,
-              codeLabel: "button.setAttribute('className', 'filled')",
-            },
-            {
-              id: "2",
-              content: <Rect size="xs" color="yellow" children="<span/>" />,
-              codeLabel: "span.innerText = '101'",
-            },
-          ],
+          domChanges: createDomChangesFromArr(domChanges),
         }));
       },
-      ...[
-        ["1", "likeButton_button", "yellow", "<button className='filled' />"],
-        ["2", "likeButton_span", "yellow", "<span>101</span>"],
-      ].map((item, index) => async () => {
+      ...(
+        [
+          [
+            "1",
+            "likeButton_button",
+            "changed",
+            "<button className='filled' />",
+          ],
+          ["2", "likeButton_span", "changed", "<span>101</span>"],
+        ] as [string, string, NodeItemState, string][]
+      ).map((item, _) => async () => {
         setCommitFlowState((prev) => ({
           ...prev,
-          domTreeNodes: {
-            ...Object.fromEntries(
-              Object.entries(prev.domTreeNodes ?? {}).map(
-                ([id, node]: [string, any]) => {
-                  return [
-                    id,
-                    TreeNodes.div(
-                      {
-                        ...node.props,
-                        color: id === item[1] ? item[2] : node.props.color,
-                      },
-                      id === item[1] ? item[3] : node.props.children,
-                    ),
-                  ];
-                },
-              ),
-            ),
-          },
-          domChanges: prev.domChanges?.map((c, i) => ({
+          domTreeNodes: prev.domTreeNodes?.map(([id, state, label, pos]) => {
+            if (id === item[1]) return [id, item[2], item[3], pos];
+            return [id, state, label, pos];
+          }),
+          domChanges: prev.domChanges?.map((c) => ({
             ...c,
             active: c.id === item[0],
           })),
@@ -1076,24 +751,7 @@ export default function DemoFlow() {
           ...prev,
           active: false,
           domChanges: [],
-          domTreeNodes: {
-            ...Object.fromEntries(
-              Object.entries(prev.domTreeNodes ?? {}).map(
-                ([id, node]: [string, any]) => {
-                  return [
-                    id,
-                    TreeNodes.div(
-                      {
-                        ...node.props,
-                        color: "transparent",
-                      },
-                      node.props.children,
-                    ),
-                  ];
-                },
-              ),
-            ),
-          },
+          domTreeNodes: resetTreeNodes(prev.domTreeNodes ?? []),
         }));
       },
     ];
@@ -1104,6 +762,9 @@ export default function DemoFlow() {
     });
   };
 
+  const handleClickBack = () => {};
+  const handleClickContinue = () => {};
+
   return (
     <div className="flex flex-col gap-10">
       <div className="flex-1 flex gap-8">
@@ -1113,9 +774,19 @@ export default function DemoFlow() {
       </div>
 
       <div className="flex gap-10">
-        <BrowserUI className="h-[500px] w-[350px] transform scale-75 absolute bottom-4 left-4 origin-bottom-left hover:scale-100 transition-all">
+        <BrowserUI className="h-[500px] w-[450px] transform scale-75 absolute bottom-4 left-4 origin-bottom-left hover:scale-100 transition-all">
           <AppExample status={appStatus} onClickLike={handleClickLike} />
         </BrowserUI>
+      </div>
+      <div className="absolute left-[450px] bottom-0 flex gap-2 border-t border-l rounded-xl border-border p-4 right-0">
+        <Button variant="outline" onClick={handleClickBack}>
+          <ChevronLeftIcon className="w-4 h-4 mr-2" />
+          Go back
+        </Button>
+        <Button variant="outline" onClick={handleClickContinue}>
+          Continue
+          <ChevronRightIcon className="w-4 h-4 ml-2" />
+        </Button>
       </div>
     </div>
   );
@@ -1170,15 +841,13 @@ function TriggerFlow({
 
 function ReconciliationFlow({
   components = [],
-  renderTreeNodes = {},
+  renderTreeNodes = [],
   renderTreeConnections,
-  renderTreeRenderFn,
   active,
 }: {
   components?: ComponentFlowItemProps[];
-  renderTreeNodes?: FlowChartProps<any>["nodes"];
+  renderTreeNodes?: TreeNodeArrType[];
   renderTreeConnections?: FlowChartProps<any>["connections"];
-  renderTreeRenderFn?: FlowChartProps<any>["children"];
   active?: boolean;
 }) {
   return (
@@ -1197,9 +866,22 @@ function ReconciliationFlow({
         <div className="flex-1 flex flex-col gap-4">
           <FlowBoardSubtitle>Render Tree</FlowBoardSubtitle>
           <FlowChart
-            nodes={renderTreeNodes}
+            nodes={createTreeNodesFromArr(renderTreeNodes ?? [])}
             connections={renderTreeConnections}
-            children={renderTreeRenderFn}
+            children={(nodes) => (
+              <Grid className="gap-4 gap-x-2">
+                {Object.entries(nodes).map(([id, node]) => (
+                  <GridItem
+                    key={id}
+                    // @ts-ignore
+                    col={node.props["data-grid-col"]}
+                    // @ts-ignore
+                    row={node.props["data-grid-row"]}
+                    children={node}
+                  />
+                ))}
+              </Grid>
+            )}
             config={{
               connectionOffset: {
                 start: "start",
@@ -1210,6 +892,29 @@ function ReconciliationFlow({
       </FlowBoardContent>
     </FlowBoard>
   );
+}
+
+type ComponentArrType = [
+  name: string,
+  states?: [string, newState?: boolean][],
+  effects?: [string, loading?: boolean][],
+];
+
+function createComponentFromArr(arr: ComponentArrType[]) {
+  return arr.map(([name, states, effects], i) => ({
+    id: `${i + 1}`,
+    name,
+    states: states?.map(([label, newState]) => ({
+      id: label,
+      label,
+      newState,
+    })),
+    effects: effects?.map(([label, loading]) => ({
+      id: label,
+      label,
+      loading,
+    })),
+  }));
 }
 
 interface ComponentFlowItemProps {
@@ -1226,6 +931,7 @@ interface ComponentFlowItemProps {
   props?: { id: string; label: string; changed?: boolean }[];
   ["data-fc-id"]?: string;
 }
+
 function ComponentFlowItem(props: ComponentFlowItemProps) {
   return (
     <div
@@ -1297,6 +1003,49 @@ function ComponentFlowItem(props: ComponentFlowItemProps) {
   );
 }
 
+type DomChangesState = "mounted" | "unmounted" | "changed";
+
+type DomChangesArrType = [
+  state: DomChangesState,
+  content: string,
+  codeLabel: string,
+];
+
+function createDomChangesFromArr(arr: DomChangesArrType[]): DomChanges[] {
+  return arr.map(([state, content, codeLabel], i) => ({
+    id: `${i + 1}`,
+    state,
+    content: (
+      <Rect
+        size="xs"
+        color={
+          state === "mounted"
+            ? "green"
+            : state === "unmounted"
+              ? "red"
+              : "yellow"
+        }
+        children={content}
+      />
+    ),
+    codeLabel,
+    active: false,
+  }));
+}
+
+function updateDomChanges(
+  current: DomChanges[],
+  id: string,
+  newChange: Partial<DomChanges>,
+) {
+  return current.map((change) => {
+    if (change.id === id) {
+      return { ...change, ...newChange };
+    }
+    return change;
+  });
+}
+
 interface DomChanges {
   id: string;
   content: ReactNode;
@@ -1309,12 +1058,10 @@ function CommitFlow({
   active,
   domTreeNodes,
   domTreeConnections,
-  domTreeRenderFn,
 }: {
   domChanges?: DomChanges[];
-  domTreeNodes?: FlowChartProps<any>["nodes"];
+  domTreeNodes?: TreeNodeArrType[];
   domTreeConnections?: FlowChartProps<any>["connections"];
-  domTreeRenderFn?: FlowChartProps<any>["children"];
   active?: boolean;
 }) {
   const changesInfo = domChanges.find((change) => change.active)?.codeLabel;
@@ -1359,9 +1106,22 @@ function CommitFlow({
         <div className="flex-1 flex flex-col gap-4">
           <FlowBoardSubtitle>DOM Tree</FlowBoardSubtitle>
           <FlowChart
-            nodes={domTreeNodes}
+            nodes={createTreeNodesFromArr(domTreeNodes ?? [], "dom_")}
             connections={domTreeConnections}
-            children={domTreeRenderFn}
+            children={(nodes) => (
+              <Grid className="gap-4 gap-x-2">
+                {Object.entries(nodes).map(([id, node]) => (
+                  <GridItem
+                    key={id}
+                    // @ts-ignore
+                    col={node.props["data-grid-col"]}
+                    // @ts-ignore
+                    row={node.props["data-grid-row"]}
+                    children={node}
+                  />
+                ))}
+              </Grid>
+            )}
             config={{
               connectionOffset: {
                 start: "start",
