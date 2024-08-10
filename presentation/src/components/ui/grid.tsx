@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
-import { ComponentProps } from "react";
+import { motion } from "framer-motion";
+import { Component, ComponentProps } from "react";
 
 export interface GridProps extends ComponentProps<"div"> {}
 
@@ -71,7 +72,7 @@ const gridItemColSpan = {
   13: "col-span-13",
 };
 
-export interface GridItemProps extends ComponentProps<"div"> {
+export interface GridItemProps extends ComponentProps<typeof motion.div> {
   col?: keyof typeof gridItemColumn;
   row?: keyof typeof gridItemRow;
   colSpan?: keyof typeof gridItemColSpan;
@@ -92,9 +93,11 @@ export function GridItem({
   const rowSpanStart = gridItemRowSpan[rowSpan];
 
   return (
-    <div
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
       className={cn(
-        "max-w-max",
+        "max-w-[40px] w-full overflow-visible",
         className,
         colStart,
         rowStart,

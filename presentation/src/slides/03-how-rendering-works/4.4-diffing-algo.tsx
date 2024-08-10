@@ -11,7 +11,7 @@ const TreeNodeRect = ({ className, size = "xs", ...props }: RectProps) => (
   <Rect
     {...props}
     size={size}
-    className={cn("w-full justify-left", className)}
+    className={cn("w-max justify-left", className)}
   />
 );
 

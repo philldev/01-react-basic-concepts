@@ -145,6 +145,11 @@ function DomChanges() {
 
   return (
     <FlowChart
+      config={{
+        connectionOffset: {
+          start: "start",
+        },
+      }}
       className="flex-1"
       nodes={{
         main: TreeNodes.main(),
@@ -235,6 +240,11 @@ function Compare() {
 
   return (
     <FlowChart
+      config={{
+        connectionOffset: {
+          start: "start",
+        },
+      }}
       className="flex-1 w-full"
       nodes={{
         main: TreeNodes.main({ focus: focus1 === "main" }),
@@ -296,6 +306,11 @@ function NewTree() {
   return (
     <FlowChart
       className="flex-1"
+      config={{
+        connectionOffset: {
+          start: "start",
+        },
+      }}
       nodes={{
         main: TreeNodes.main(),
         div: TreeNodes.div(),

@@ -40,6 +40,14 @@ interface _Step {
   order: number;
 }
 
+export function createStep(id: string, show: () => void, order?: number) {
+  return {
+    id,
+    show,
+    order: order ?? 0,
+  };
+}
+
 class SlideSteps {
   private currentIndex = 0;
   private steps: _Step[] = [];
@@ -309,7 +317,7 @@ function Slide({
   return (
     <motion.div
       className={cn(
-        "h-screen absolute inset-0 w-screen p-20 pt-40 overflow-hidden",
+        "h-screen absolute inset-0 w-screen p-20 pt-32 overflow-hidden",
         className,
       )}
       custom={slideTransition}

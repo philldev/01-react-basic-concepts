@@ -27,11 +27,19 @@ export type FlowChartConnection<T, K> = [
   connectionType: `${PosiblePosition}_to_${PosiblePosition}`,
 ];
 
+export type FlowChartConfig = {
+  connectionOffset?: {
+    start?: "start" | "end" | "center";
+    end?: "start" | "end" | "center";
+  };
+};
+
 export interface FlowChartProps<T extends FlowChartNodes<any>>
   extends Omit<ComponentProps<"div">, "children"> {
   nodes: T;
   connections?: FlowChartConnection<keyof T, keyof T>[];
-  children: (nodes: ModifiedNodes<T>) => ReactNode;
+  children?: (nodes: ModifiedNodes<T>) => ReactNode;
+  config?: FlowChartConfig;
 }
 
 export function FlowChart<T extends FlowChartNodes<any>>({
@@ -39,6 +47,7 @@ export function FlowChart<T extends FlowChartNodes<any>>({
   children,
   nodes,
   connections = [],
+  config,
   ...props
 }: FlowChartProps<T>) {
   const flowChartId = useId();
@@ -104,6 +113,8 @@ export function FlowChart<T extends FlowChartNodes<any>>({
         toEl,
         fromPosition as "top" | "bottom" | "left" | "right",
         toPosition as "top" | "bottom" | "left" | "right",
+        config?.connectionOffset?.start ?? "center",
+        config?.connectionOffset?.end ?? "center",
       );
 
       newPaths.push({
@@ -138,7 +149,12 @@ export function FlowChart<T extends FlowChartNodes<any>>({
     return () => {
       resizeObservers.forEach((resizeObserver) => resizeObserver.disconnect());
     };
-  }, [newNodes, filteredConnections]);
+  }, [
+    newNodes,
+    filteredConnections,
+    config?.connectionOffset?.start,
+    config?.connectionOffset?.end,
+  ]);
 
   return (
     <div className={cn("relative w-max", className)} {...props}>
@@ -169,7 +185,7 @@ export function FlowChart<T extends FlowChartNodes<any>>({
           />
         ))}
       </svg>
-      {children(newNodes)}
+      {children?.(newNodes)}
     </div>
   );
 }
@@ -178,7 +194,7 @@ const Path = (props: { id: string; initialPath: string; endPath: string }) => {
   const [scope, animate] = useAnimate();
 
   const handleAnimation = async () => {
-    await animate(
+    animate(
       scope.current,
       {
         d: props.endPath,
@@ -211,7 +227,7 @@ const chartBoxCva = cva(
   {
     variants: {
       type: {
-        solid: "bg-opacity-100",
+        solid: "bg-opacity-80",
         transparent: "bg-opacity-20",
       },
       color: {
@@ -235,9 +251,6 @@ const chartBoxCva = cva(
       },
       focus: {
         true: "outline-yellow-500",
-      },
-      bordered: {
-        true: "bg-background",
       },
     },
     defaultVariants: {
@@ -339,22 +352,38 @@ export function Rect({
 function getPosition(
   node: HTMLElement,
   position: "top" | "bottom" | "left" | "right",
+  offset: "start" | "end" | "center" = "center",
 ) {
+  const getModifier = (offset: "start" | "end" | "center", size: number) => {
+    // if (offset === "start") return (size / 100) * 10;
+    // if (offset === "end") return size - (size / 100) * 10;
+    if (offset === "start") return 12;
+    if (offset === "end") return size - 12;
+
+    return size / 2;
+  };
+
   switch (position) {
     case "top":
-      return [node.offsetLeft + node.offsetWidth / 2, node.offsetTop] as const;
+      return [
+        node.offsetLeft + getModifier(offset, node.offsetWidth),
+        node.offsetTop,
+      ];
     case "bottom":
       return [
-        node.offsetLeft + node.offsetWidth / 2,
+        node.offsetLeft + getModifier(offset, node.offsetWidth),
         node.offsetTop + node.offsetHeight,
-      ] as const;
+      ];
     case "left":
-      return [node.offsetLeft, node.offsetTop + node.offsetHeight / 2] as const;
+      return [
+        node.offsetLeft,
+        node.offsetTop + getModifier(offset, node.offsetHeight),
+      ];
     case "right":
       return [
         node.offsetLeft + node.offsetWidth,
-        node.offsetTop + node.offsetHeight / 2,
-      ] as const;
+        node.offsetTop + getModifier(offset, node.offsetHeight),
+      ];
   }
 }
 
@@ -363,11 +392,13 @@ function getConnectionPath(
   endNode?: HTMLElement | null,
   startPosition: "top" | "bottom" | "left" | "right" = "right",
   endPosition: "top" | "bottom" | "left" | "right" = "left",
+  startOffset: "start" | "end" | "center" = "center",
+  endOffset: "start" | "end" | "center" = "center",
 ) {
   if (!startNode || !endNode) return { initialPath: "", endPath: "" };
 
-  const start = getPosition(startNode, startPosition);
-  const end = getPosition(endNode, endPosition);
+  let start = getPosition(startNode, startPosition, startOffset);
+  let end = getPosition(endNode, endPosition, endOffset);
 
   const middle = [
     start[0] + (end[0] - start[0]) / 2,

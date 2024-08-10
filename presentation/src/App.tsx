@@ -23,6 +23,9 @@ import DiffingAlgo5 from "./slides/03-how-rendering-works/4.5-diffing-algo";
 import DiffingAlgo6 from "./slides/03-how-rendering-works/4.6-diffing-algo";
 import CommitTitle from "./slides/03-how-rendering-works/5-commit";
 import Commit from "./slides/03-how-rendering-works/5.1-commit";
+import DemoTitle from "./slides/04-demo/0-demo-title";
+import DemoExample from "./slides/04-demo/1-demo-example";
+import DemoFlow from "./slides/04-demo/2-demo-flow";
 
 const slides = [
   Cover,
@@ -49,6 +52,8 @@ const slides = [
   DiffingAlgo6,
   CommitTitle,
   Commit,
+  DemoTitle,
+  DemoExample,
 ] as const;
 
 function App() {
@@ -57,6 +62,7 @@ function App() {
       {slides.map((Comp, index) => (
         <Slide key={index} element={<Comp />} />
       ))}
+      <Slide className="p-10 px-4" element={<DemoFlow />} />
     </Deck>
   );
 }

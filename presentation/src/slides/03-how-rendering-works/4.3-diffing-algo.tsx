@@ -12,7 +12,7 @@ const TreeNodeRect = ({ className, size = "xs", ...props }: RectProps) => (
   <Rect
     {...props}
     size={size}
-    className={cn("w-full justify-left", className)}
+    className={cn("w-max justify-left", className)}
   />
 );
 
@@ -102,7 +102,12 @@ const oldTreeNodes = {
 function OldTree() {
   return (
     <FlowChart
-      className="flex-1"
+      config={{
+        connectionOffset: {
+          start: "start",
+        },
+      }}
+      className="flex-1 w-[180px]"
       nodes={oldTreeNodes}
       connections={[
         ["ul", "li_1", "bottom_to_left"],
@@ -152,7 +157,12 @@ function DomChanges() {
 
   return (
     <FlowChart
-      className="flex-1"
+      config={{
+        connectionOffset: {
+          start: "start",
+        },
+      }}
+      className="flex-1 w-[290px]"
       nodes={{
         ul: TreeNodes.ul(),
         li1: TreeNodes.li(
@@ -246,6 +256,11 @@ function Compare() {
 
   return (
     <FlowChart
+      config={{
+        connectionOffset: {
+          start: "start",
+        },
+      }}
       className="flex-1 w-full"
       nodes={{
         old_ul: TreeNodes.ul(),
@@ -359,7 +374,12 @@ function Compare() {
 function NewTree() {
   return (
     <FlowChart
-      className="flex-1"
+      config={{
+        connectionOffset: {
+          start: "start",
+        },
+      }}
+      className="flex-1 w-[190px]"
       nodes={newTreeNodes}
       connections={[
         ["ul", "li_1", "bottom_to_left"],

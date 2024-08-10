@@ -1,10 +1,10 @@
 import { SlideHeading } from "@/components/ui/slide-heading";
-import Content from "./2-trigger.code.md";
-import { parseRoot, Block, HighlightedCodeBlock } from "codehike/blocks";
 import { z } from "zod";
 import { Code } from "@/components/code";
 import { SlideText } from "@/components/ui/slide-text";
 import { FlowChart, Rect } from "@/components/flow-chart";
+import { parseRoot, Block, HighlightedCodeBlock } from "codehike/blocks";
+import Content from "./2-trigger.code.md";
 
 const { steps } = parseRoot(
   Content,

@@ -8,7 +8,10 @@ export default function BrowserUI({
 }: ComponentProps<"div">) {
   return (
     <div
-      className={cn("border border-border w-max p-4 rounded-lg", className)}
+      className={cn(
+        "border border-border bg-background w-max p-4 rounded-lg",
+        className,
+      )}
       {...props}
     >
       <div className="flex gap-2">
@@ -16,7 +19,7 @@ export default function BrowserUI({
         <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
         <div className="w-3 h-3 rounded-full bg-green-500"></div>
       </div>
-      <div className="min-w-[300px] h-full pt-4">{children}</div>
+      <div className="min-w-[300px] h-full py-4">{children}</div>
     </div>
   );
 }

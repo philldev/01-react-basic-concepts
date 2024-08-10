@@ -12,7 +12,7 @@ const TreeNodeRect = ({ className, size = "xs", ...props }: RectProps) => (
   <Rect
     {...props}
     size={size}
-    className={cn("w-full justify-left", className)}
+    className={cn("w-max justify-left", className)}
   />
 );
 
@@ -49,7 +49,7 @@ export default function Commit() {
 
       <div className="flex gap-20 flex-1">
         <CommitFlow />
-        <Step order={7}>
+        <Step order={7} className="flex-1">
           <CommitFlowRerenders />
         </Step>
       </div>
@@ -119,6 +119,11 @@ function CommitFlow() {
             DOM Tree
           </p>
           <FlowChart
+            config={{
+              connectionOffset: {
+                start: "start",
+              },
+            }}
             nodes={{
               root: TreeNodes.div({}, "<div id='root'>"),
               main: TreeNodes.main({ color: "green" }, "<main>"),
@@ -234,6 +239,11 @@ function CommitFlowRerenders() {
             DOM Tree
           </p>
           <FlowChart
+            config={{
+              connectionOffset: {
+                start: "start",
+              },
+            }}
             nodes={{
               root: TreeNodes.div({}, "<div id='root'>"),
               main: TreeNodes.main(
