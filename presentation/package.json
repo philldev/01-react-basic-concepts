@@ -22,6 +22,7 @@
     "lucide-react": "^0.417.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-hotkeys-hook": "^4.5.0",
     "react-router-dom": "^6.25.1",
     "react-syntax-highlighter": "^15.5.0",
     "tailwind-merge": "^2.4.0",

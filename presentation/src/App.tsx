@@ -71,8 +71,14 @@ function App() {
         />
       ))}
       <Slide className="p-10 px-4" element={<DemoFlow />} />
-      <Slide element={<Summary />} />
-      <Slide element={<ThankYou />} />
+      <Slide
+        style={{ backgroundImage: `url(${gridPattern})` }}
+        element={<Summary />}
+      />
+      <Slide
+        style={{ backgroundImage: `url(${gridPattern})` }}
+        element={<ThankYou />}
+      />
     </Deck>
   );
 }

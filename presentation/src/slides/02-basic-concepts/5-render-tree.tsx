@@ -39,9 +39,11 @@ export default function RenderTree() {
 
       <div className="flex gap-20">
         <div className="">
-          <Code code={steps[0].code} styled={false} lineNumbers={false} />
+          <Code code={steps[0].code} />
         </div>
         <FlowChart
+          styled
+          className="w-full p-8"
           config={{
             connectionOffset: {
               start: "start",
@@ -50,15 +52,15 @@ export default function RenderTree() {
           nodes={{
             app: treeNode("<App />"),
             div: treeNode("<div />"),
-            h1: treeNode("<h1 />"),
+            h1: treeNode("<h1>Members of Stark Family</h1>"),
             members: treeNode("<Members />"),
             ul: treeNode("<ul />"),
-            li_0: treeNode("<li />"),
-            li_1: treeNode("<li />"),
-            li_2: treeNode("<li />"),
-            li_3: treeNode("<li />"),
-            li_4: treeNode("<li />"),
-            li_5: treeNode("<li />"),
+            li_0: treeNode("<li>Jon Snow</li>"),
+            li_1: treeNode("<li>Robb Stark</li>"),
+            li_2: treeNode("<li>Sansa Stark</li>"),
+            li_3: treeNode("<li>Arya Stark</li>"),
+            li_4: treeNode("<li>Bran Stark</li>"),
+            li_5: treeNode("<li>Rickon Stark</li>"),
           }}
           connections={[
             ["app", "div", "bottom_to_left"],
@@ -74,18 +76,18 @@ export default function RenderTree() {
           ]}
         >
           {(nodes) => (
-            <Grid className="gap-4 gap-x-2">
+            <Grid className="gap-4 gap-x-2 w-max">
               <GridItem col={1} row={1} children={nodes.app} />
               <GridItem col={2} row={2} children={nodes.div} />
               <GridItem col={3} row={3} children={nodes.h1} />
-              <GridItem col={4} row={4} children={nodes.members} />
-              <GridItem col={5} row={5} children={nodes.ul} />
-              <GridItem col={6} row={6} children={nodes.li_0} />
-              <GridItem col={6} row={7} children={nodes.li_1} />
-              <GridItem col={6} row={8} children={nodes.li_2} />
-              <GridItem col={6} row={9} children={nodes.li_3} />
-              <GridItem col={6} row={10} children={nodes.li_4} />
-              <GridItem col={6} row={11} children={nodes.li_5} />
+              <GridItem col={3} row={4} children={nodes.members} />
+              <GridItem col={4} row={5} children={nodes.ul} />
+              <GridItem col={5} row={6} children={nodes.li_0} />
+              <GridItem col={5} row={7} children={nodes.li_1} />
+              <GridItem col={5} row={8} children={nodes.li_2} />
+              <GridItem col={5} row={9} children={nodes.li_3} />
+              <GridItem col={5} row={10} children={nodes.li_4} />
+              <GridItem col={5} row={11} children={nodes.li_5} />
             </Grid>
           )}
         </FlowChart>

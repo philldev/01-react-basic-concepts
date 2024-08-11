@@ -44,6 +44,7 @@ export interface FlowChartProps<T extends FlowChartNodes<any>>
   connections?: FlowChartConnection<keyof T, keyof T>[];
   children?: (nodes: ModifiedNodes<T>) => ReactNode;
   config?: FlowChartConfig;
+  styled?: boolean;
 }
 
 export function FlowChart<T extends FlowChartNodes<any>>({
@@ -161,7 +162,14 @@ export function FlowChart<T extends FlowChartNodes<any>>({
   ]);
 
   return (
-    <div className={cn("relative w-max", className)} {...props}>
+    <div
+      className={cn(
+        "relative w-max",
+        props.styled && "rounded-md border-border p-4 border bg-blue-900/10",
+        className,
+      )}
+      {...props}
+    >
       <svg className="inset-0 text-muted-foreground -z-10 absolute w-full h-full">
         <defs>
           <marker

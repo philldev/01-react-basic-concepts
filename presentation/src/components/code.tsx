@@ -38,6 +38,7 @@ export const focus: AnnotationHandler = {
 export function Code(
   props: ComponentProps<typeof Pre> & {
     containerProps?: ComponentProps<typeof motion.div>;
+    containerClassName?: string;
     lineNumbers?: boolean;
     styled?: boolean;
     ["data-fc-id"]?: string;
@@ -48,6 +49,7 @@ export function Code(
     code,
     styled = true,
     lineNumbers = true,
+    containerClassName,
     ["data-fc-id"]: flowChartId,
     ...restProps
   } = props;
@@ -65,7 +67,7 @@ export function Code(
         "w-max",
         styled && "rounded-md border-border p-4 border bg-blue-900/10",
         lineNumbers && "pl-2",
-        className,
+        className ?? containerClassName,
       )}
       data-fc-id={flowChartId}
       {...restContainerProps}

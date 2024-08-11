@@ -108,7 +108,7 @@ function getProps(state: NodeItemState) {
 const StateCache = new Map<string, any[]>();
 
 export default function DemoFlow() {
-  const { deckSteps, slideIndex } = useDeck();
+  const { deckSteps, slideIndex, setDisableNext } = useDeck();
 
   const [triggerFlowState, setTriggerFlowState] = useState<{
     events: TriggerEvent[];
@@ -150,6 +150,8 @@ export default function DemoFlow() {
 
   useOnMount(() => {
     const getId = (idx: number) => `step-${idx}`;
+
+    setDisableNext(true);
 
     StateCache.clear();
     let steps = [
@@ -270,9 +272,7 @@ export default function DemoFlow() {
               ? {
                   ...c,
                   effects: c.effects?.map((e) =>
-                    e.id === "getPost()"
-                      ? { ...e, loading: false, disabled: true }
-                      : e,
+                    e.id === "1" ? { ...e, loading: false, disabled: true } : e,
                   ),
                 }
               : c,
@@ -313,7 +313,7 @@ export default function DemoFlow() {
             },
           ),
           components: prev.components.map((c) =>
-            c.id === "1"
+            c.name === "<Post />"
               ? {
                   ...c,
                   states: c.states?.map((s) =>
@@ -753,6 +753,7 @@ export default function DemoFlow() {
           domChanges: [],
           domTreeNodes: resetTreeNodes(prev.domTreeNodes ?? []),
         }));
+        setDisableNext(false);
       },
     ];
 
@@ -777,16 +778,6 @@ export default function DemoFlow() {
         <BrowserUI className="h-[500px] w-[450px] transform scale-75 absolute bottom-4 left-4 origin-bottom-left hover:scale-100 transition-all">
           <AppExample status={appStatus} onClickLike={handleClickLike} />
         </BrowserUI>
-      </div>
-      <div className="absolute left-[450px] bottom-0 flex gap-2 border-t border-l rounded-xl border-border p-4 right-0">
-        <Button variant="outline" onClick={handleClickBack}>
-          <ChevronLeftIcon className="w-4 h-4 mr-2" />
-          Go back
-        </Button>
-        <Button variant="outline" onClick={handleClickContinue}>
-          Continue
-          <ChevronRightIcon className="w-4 h-4 ml-2" />
-        </Button>
       </div>
     </div>
   );
@@ -904,13 +895,13 @@ function createComponentFromArr(arr: ComponentArrType[]) {
   return arr.map(([name, states, effects], i) => ({
     id: `${i + 1}`,
     name,
-    states: states?.map(([label, newState]) => ({
-      id: label,
+    states: states?.map(([label, newState], i) => ({
+      id: `${i + 1}`,
       label,
       newState,
     })),
-    effects: effects?.map(([label, loading]) => ({
-      id: label,
+    effects: effects?.map(([label, loading], i) => ({
+      id: `${i + 1}`,
       label,
       loading,
     })),
