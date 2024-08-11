@@ -29,6 +29,8 @@ import DemoFlow from "./slides/04-demo/2-demo-flow";
 import Summary from "./slides/outro/summary";
 import ThankYou from "./slides/outro/thankyou";
 
+import gridPattern from "./assets/grid-pattern.svg";
+
 const slides = [
   Cover,
   Outline,
@@ -62,7 +64,11 @@ function App() {
   return (
     <Deck>
       {slides.map((Comp, index) => (
-        <Slide key={index} element={<Comp />} />
+        <Slide
+          style={{ backgroundImage: `url(${gridPattern})` }}
+          key={index}
+          element={<Comp />}
+        />
       ))}
       <Slide className="p-10 px-4" element={<DemoFlow />} />
       <Slide element={<Summary />} />
