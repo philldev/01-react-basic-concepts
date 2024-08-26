@@ -30,6 +30,8 @@ import Summary from "./slides/outro/summary";
 import ThankYou from "./slides/outro/thankyou";
 
 import gridPattern from "./assets/grid-pattern.svg";
+import DiffingAlgo4_5_2 from "./slides/03-how-rendering-works/4.5.2-diffing-algo";
+import DiffingAlgo5_1 from "./slides/03-how-rendering-works/4.5.1-diffing-algo";
 
 const slides = [
   Cover,
@@ -53,6 +55,8 @@ const slides = [
   DiffingAlgo3,
   DiffingAlgo4,
   DiffingAlgo5,
+  DiffingAlgo5_1,
+  DiffingAlgo4_5_2,
   DiffingAlgo6,
   CommitTitle,
   Commit,

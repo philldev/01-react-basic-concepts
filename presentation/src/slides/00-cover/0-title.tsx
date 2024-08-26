@@ -9,8 +9,8 @@ export default function Cover() {
       <h2 className="text-left text-4xl mb-10 text-foreground/50">
         How React works under the hood
       </h2>
-      <div className="flex flex-col absolute bottom-0 left-0 text-muted-foreground">
-        <p>Deddy Wolley</p>
+      <div className="flex flex-col absolute bottom-0 left-0 text-muted-foreground text-lg">
+        <p>From: Deddy Wolley</p>
         <p>Weekendinc</p>
       </div>
     </div>

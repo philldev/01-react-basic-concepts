@@ -6,6 +6,8 @@ import { Step } from "@/components/deck";
 import { SlideHeading } from "@/components/ui/slide-heading";
 import { SlideText } from "@/components/ui/slide-text";
 import Content from "./4-react-effects.code.md";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Terminal, FileWarning } from "lucide-react";
 
 const { steps } = parseRoot(
   Content,
@@ -20,13 +22,33 @@ const { steps } = parseRoot(
   }),
 );
 
+const infos = [
+  null,
+
+  <Alert className="mt-10">
+    <AlertDescription className="text-yellow-500">
+      On Strict Mode React will mount the component twice, so the effect will
+      run 2 times.
+    </AlertDescription>
+  </Alert>,
+
+  <Alert className="mt-10">
+    <AlertDescription className="text-yellow-500">
+      If we provide an object as dependencies item the effect will always run
+      because react compare the dependencies by its value using{" "}
+      <code>Object.is()</code> not by its reference.
+    </AlertDescription>
+  </Alert>,
+];
+
 export default function ReactEffects() {
   return (
     <div className="flex flex-col h-full">
       <SlideHeading className="mb-8">React Effects</SlideHeading>
       <SlideText className="mb-20">
-        React Effects are functions that run after every render. They are useful
-        for performing side effects, such as fetching data from an API.
+        React Effects are side effect functions that run after every render.
+        They are useful for performing side effects, such as fetching data from
+        an API.
       </SlideText>
 
       <FlowChart
@@ -72,12 +94,13 @@ function Examples() {
             key={index}
             order={index + 1}
             variants={{
-              initial: { opacity: 0.5 },
+              initial: { opacity: 0.1 },
               show: { opacity: 1 },
             }}
             onNext={async (controls) => {
               await controls.start("initial");
             }}
+            className="flex-1"
           >
             <Code
               key={index}
@@ -85,6 +108,7 @@ function Examples() {
               styled={false}
               lineNumbers={false}
             />
+            {infos[index]}
           </Step>
         ))}
       </div>

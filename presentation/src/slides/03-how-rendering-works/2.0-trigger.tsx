@@ -46,20 +46,20 @@ export default function Trigger0() {
               Render Tree
             </Rect>
           ),
-          effects: (
-            <Rect color="light" className="w-full" size="lg">
-              runEffects()
-            </Rect>
-          ),
+          // effects: (
+          //   <Rect color="light" className="w-full" size="lg">
+          //     runEffects()
+          //   </Rect>
+          // ),
         }}
         connections={[
           ["component", "rerender", "bottom_to_left"],
           ["newState", "rerender", "right_to_bottom"],
           ["state", "component", "bottom_to_left"],
           ["rerender", "newTree", "right_to_left"],
-          ["rerender", "effects", "right_to_left"],
+          // ["rerender", "effects", "right_to_left"],
         ]}
-        className="w-full"
+        className="w-full flex-1"
         children={(nodes) => (
           <div className="grid grid-cols-4 relative gap-x-32 gap-y-20 w-full">
             <div className="col-start-1">{nodes.component}</div>
@@ -67,11 +67,14 @@ export default function Trigger0() {
             <div className="col-start-3 row-start-2">
               {nodes.initializeState}
             </div>
-            <div className="col-start-3 row-start-3">{nodes.effects}</div>
             <div className="col-start-4 row-start-2">{nodes.newTree}</div>
           </div>
         )}
       />
+
+      <a href="https://react.dev/learn/render-and-commit#initial-render">
+        react.dev/learn/render-and-commit#initial-render
+      </a>
     </div>
   );
 }

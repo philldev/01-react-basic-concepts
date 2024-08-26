@@ -163,12 +163,12 @@ export function FlowChart<T extends FlowChartNodes<any>>({
 
   return (
     <div
+      {...props}
       className={cn(
         "relative w-max",
         props.styled && "rounded-md border-border p-4 border bg-blue-900/10",
         className,
       )}
-      {...props}
     >
       <svg className="inset-0 text-muted-foreground -z-10 absolute w-full h-full">
         <defs>

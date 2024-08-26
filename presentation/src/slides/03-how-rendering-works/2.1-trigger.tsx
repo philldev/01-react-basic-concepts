@@ -46,11 +46,11 @@ export default function Trigger1() {
               New Render Tree
             </Rect>
           ),
-          effects: (
-            <Rect color="light" className="w-full" size="lg">
-              runEffects()
-            </Rect>
-          ),
+          // effects: (
+          //   <Rect color="light" className="w-full" size="lg">
+          //     runEffects()
+          //   </Rect>
+          // ),
         }}
         connections={[
           ["component", "setState", "bottom_to_top"],
@@ -58,21 +58,24 @@ export default function Trigger1() {
           ["compare", "rerender", "right_to_bottom"],
           ["state", "component", "bottom_to_left"],
           ["rerender", "newTree", "right_to_left"],
-          ["rerender", "effects", "right_to_left"],
+          // ["rerender", "effects", "right_to_left"],
         ]}
-        className="w-full"
+        className="w-full flex-1"
         children={(nodes) => (
           <div className="grid grid-cols-4 relative gap-x-32 gap-y-20 w-full">
             <div className="col-start-1">{nodes.component}</div>
             <div className="col-start-1 row-start-2">{nodes.setState}</div>
             <div className="col-start-2 row-start-2">{nodes.rerender}</div>
             <div className="col-start-3 row-start-2">{nodes.newState}</div>
-            <div className="col-start-3 row-start-3">{nodes.effects}</div>
             <div className="col-start-4 row-start-2">{nodes.newTree}</div>
             <div className="col-start-1 row-start-3">{nodes.compare}</div>
           </div>
         )}
       />
+
+      <a href="https://react.dev/learn/render-and-commit#re-renders-when-state-updates">
+        react.dev/learn/render-and-commit#re-renders-when-state-updates
+      </a>
     </div>
   );
 }
